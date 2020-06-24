@@ -1,7 +1,7 @@
 const SessionStore = {
     data: {
         userId: null,
-        authKey: 1,
+        authKey: "fdsfdsdsagfsagsa",
     },
     methods: {
         setAuth(token){
