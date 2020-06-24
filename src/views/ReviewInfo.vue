@@ -74,11 +74,6 @@ export default {
                 { Name: 'Robert', Function: 'Owner', Rechte: 'Admin', Action:'' },
                 { Name: 'Marc', Function: 'Member', Rechte: 'Read Only', Action:'' },
                 { Name: 'Peter', Function: 'Member', Rechte: 'Read+Write', Action:'' }
-            ],
-            api_keys: [
-                { Name: 'Springer', Key: 'asdasfsdfq2345sadyfdsf', Status: 'Aktiv', Action:'' },
-                { Name: 'IEEE', Key: 'sdf235324567rt6durftghzu', Status: 'Aktiv', Action:'' },
-                { Name: 'tba', Key: 'tba', Status: 'tba', Action:'' }
             ]
 
         }
