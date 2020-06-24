@@ -1,17 +1,12 @@
 <template>
     <div class="score">
-        
-        <!--
-        <b-row>                                                                                           
+    <!--<b-row>                                                                                           
             <b-col ></b-col>
             <b-col ><b-button variant="primary" @click="persist">Persist these {{ pageLength*2 }} out of {{ totalNum }} results</b-button></b-col>
             <b-col ><b-button variant="primary" @click="getPersisted">Retrieve persisted Results</b-button></b-col>
             <b-col ></b-col>
-        </b-row>
-
-        <br/>-->
-
-
+        </b-row>-->
+        
         <b-table hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
             <template v-slot:cell(uri)="row">
@@ -23,6 +18,7 @@
             </template>
 
             <template v-slot:cell(score)="">
+                <!--<b-badge v-for="score in row.item.scores" variant="ownVariant(score)"></b-badge>-->
                 <b-badge variant="success">A</b-badge>
                 <b-badge variant="success">B</b-badge>
                 <b-badge variant="danger">C</b-badge>
@@ -61,19 +57,16 @@
             </template>
 
         </b-table>
-        <!-- -->
     </div>
 </template>
 
 <script>
+import SessionStore from "../stores/SessionStore"
 
 export default {
     name: 'Score',
-    ///*
     data: () => {
         return {
-        isBusy: false,
-        query: "",
         fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri','score'],
         items: [],
         text: "",
@@ -82,27 +75,20 @@ export default {
         pageLength: 100,
         scoreUp: null,
         perso: null,
-        totalNum: 0
+        //totalNum: 0 num of persisted entries on db
+        //user_id,reviewinternal_user_id,review_id
         };
     },
 
+
     beforeMount() {
+        if(SessionStore.data.authKey==null){
+            this.$router.push("/login")
+        }
         //this.getPersisted()
     },
 
     methods: {
-
-        persist(){
-            this.items.forEach(element => {
-                delete element._id //für bugfix
-            });
-
-            this.$http.post('https://pavdg6jfrj.execute-api.eu-central-1.amazonaws.com/dev4/persist',{"review_id": "5ecd4bc497446f15f0a85f0d","results":this.items})
-            //.then(response => { return response.json(); })
-            .then(data => {console.log("persisted");console.log(data)})
-            .catch(error => console.log(error))
-        },
-
         getPersisted(){
             this.$http.get('https://pavdg6jfrj.execute-api.eu-central-1.amazonaws.com/dev4/results?review_id=5ecd4bc497446f15f0a85f0d')
             //.then(response => { return console.log(response),response.json(); })
@@ -158,7 +144,7 @@ export default {
             }
             return "light"
         }
-    },//*/
+    },
     components:{
     }
 }

@@ -1,20 +1,39 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 import Score from '../views/Score.vue'
+
+import Signup from '../views/Signup.vue'
+import Login from '../views/Login.vue'
+import ReviewInfo from '../views/ReviewInfo.vue'
+import Reviews from '../views/Reviews.vue'
 
 Vue.use(VueRouter)
 
   const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'Reviews',
+    component: Reviews
   },
   {
     path: '/score',
     name: 'Score',
     component: Score
+  },
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: Signup
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/reviewinfo',
+    name: 'ReviewInfo',
+    component: ReviewInfo
   },
   {
     path: '/about',
