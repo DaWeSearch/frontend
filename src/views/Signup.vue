@@ -9,6 +9,8 @@
             footer-tag="footer"
             >
                 <b-form @submit="onSubmit">
+                    <b-form-input class="mb-2" required v-model="form.surname" placeholder="First name"></b-form-input>
+                    <b-form-input class="mb-2" required v-model="form.name" placeholder="Last name"></b-form-input>
                     <b-form-input class="mb-2" required v-model="form.username" placeholder="Username"></b-form-input>
                     <b-form-input class="mb-2" required v-model="form.email" type="email" placeholder="Email"></b-form-input>
                     <b-form-input class="mb-2" required v-model="passwordConfirm" type="password" placeholder="Password" ></b-form-input>
@@ -27,13 +29,15 @@
 </template>
 
 <script>
-import SessionStore from "../stores/SessionStore"
+//import SessionStore from "../stores/SessionStore"
 
 export default {
     name: 'Register',
     data: () => {
         return {
             form: {
+                surname: "",
+                name:"",
                 username: "",
                 email: "",
                 password: ""
@@ -44,19 +48,20 @@ export default {
 
     methods: {
         onSubmit(evt){
-            
             evt.preventDefault()
-            console.log(this.passwordsEqual())
-            //this.$http.post('',this.form)
-            //.then(data => {console.log("hier ist ein signupresponse")})
-            //.catch(error => console.log(error))
+            if(this.passwordsEqual()){
+                this.$http.post('https://vocxdyh56a.execute-api.eu-central-1.amazonaws.com/dev/users',this.form)
+                .then(data => {console.log("hier ist ein signupresponse");console.log(data)})
+                .catch(error => console.log(error));
+            
+            }
         },
         passwordsEqual(){
             return this.form.password.length!=0 ? this.form.password==this.passwordConfirm : null
         },
-        printAuthKey(){
+        /*printAuthKey(){
             console.log(SessionStore.data.authKey)
-        }
+        }*/
         
     },
 

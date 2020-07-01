@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Score from '../views/Score.vue'
 
-import Signup from '../views/Signup.vue'
-import Login from '../views/Login.vue'
-import ReviewInfo from '../views/ReviewInfo.vue'
 import Reviews from '../views/Reviews.vue'
+import ReviewInfo from '../views/ReviewInfo.vue'
+import Search from '../views/Search.vue'
+import Score from '../views/Score.vue'
+import Login from '../views/Login.vue'
+import Signup from '../views/Signup.vue'
 
 Vue.use(VueRouter)
 
@@ -14,6 +15,11 @@ Vue.use(VueRouter)
     path: '/',
     name: 'Reviews',
     component: Reviews
+  },
+  {
+    path: '/search',
+    name: 'Search',
+    component: Search
   },
   {
     path: '/score',

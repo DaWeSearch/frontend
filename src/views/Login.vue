@@ -1,5 +1,12 @@
 <template>
     <div id="app">
+        <b-nav tabs >
+            <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
+            <b-nav-item disabled><router-link to="/reviewinfo">ReviewInfo</router-link></b-nav-item>
+            <b-nav-item disabled><router-link to="/search">Search</router-link></b-nav-item>
+            <b-nav-item disabled> <router-link to="/score">Score</router-link></b-nav-item>
+            <b-nav-item active><router-link to="/about">About</router-link></b-nav-item>
+        </b-nav>
 
         <div class="mt-5 d-flex">
             <b-card 
@@ -37,10 +44,9 @@ export default {
     methods: {
         onSubmit(evt){
             evt.preventDefault()
-            console.log("hier post login")
-            //this.$http.post('',this.form)
-            //.then(data => {console.log("hier ist ein signupresponse")})
-            //.catch(error => console.log(error))
+            this.$http.post('https://vocxdyh56a.execute-api.eu-central-1.amazonaws.com/dev/login',{"username":this.username,"password":this.password})
+            .then(data => {console.log("hier ist ein signupresponse");SessionStore.data.authKey=data})
+            .catch(error => console.log(error));
         },
         printAuthKey(){
             console.log(SessionStore.data.authKey)

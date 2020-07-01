@@ -1,41 +1,56 @@
 <template>
-    <div id="app">
-        <b-container>
+    <div id="reviews">
+        
+        
+            <b-nav tabs >
+                <b-nav-item active><router-link to="/">Reviews</router-link></b-nav-item>
+                <b-nav-item><router-link to="/reviewinfo">ReviewInfo</router-link></b-nav-item>
+                <b-nav-item><router-link to="/search">Search</router-link></b-nav-item>
+                <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
+                <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
+        
+            </b-nav>
 
-                <div class="table-title">
-                    <div class="row">
-                        <div class="col-sm-5">
-                            <h2>Verfügbare <b>Reviews</b></h2>
-                        </div>
-                        <div class="col-sm-7">
-                            <div>
-                                <b-button href="#">Person zu review hinzufügen/einladen</b-button>
-                                <b-button href="#">Neue Review erstellen</b-button>
-                            </div>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <h2>Verfügbare <b>Reviews</b></h2>
+                    </div>
+                    <div class="col-sm-7">
+                        <div>
+                            <b-button href="#">Person zu review hinzufügen/einladen</b-button>
+                            <b-button href="#">Neue Review erstellen</b-button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- https://bootstrap-vue.org/docs/components/table -->
-                <b-table
-                        id="my-table"
-                        :items="items"
-                        :per-page="perPage"
-                        :current-page="currentPage"
-                        small
-                ></b-table>
-                <!-- aktuelle seite anzeigen --->
-                <p class="mt-3">Aktuelle Seite: {{ currentPage }}</p>
+            <!-- https://bootstrap-vue.org/docs/components/table -->
+            <b-table
+                    id="my-table"
+                    :items="items"
+                    :per-page="perPage"
+                    :current-page="currentPage"
+                    small
+            ></b-table>
+            <!-- aktuelle seite anzeigen --->
+            <p class="mt-3">Aktuelle Seite: {{ currentPage }}</p>
 
-                <!-- https://bootstrap-vue.org/docs/components/pagination -->
-                <b-pagination
-                        v-model="currentPage"
-                        :total-rows="rows"
-                        :per-page="perPage"
-                        aria-controls="my-table"
-                ></b-pagination>
-
-        </b-container>
+            <!-- https://bootstrap-vue.org/docs/components/pagination -->
+            <b-pagination
+                    v-model="currentPage"
+                    :total-rows="rows"
+                    :per-page="perPage"
+                    aria-controls="my-table"
+            ></b-pagination>
     </div>
 </template>
 

@@ -1,63 +1,64 @@
 <template>
     <div id="info">
-        <b-container id="review-info">
-            <b-card
-                    title="Hallo (User_Name)!"
-                    tag="info"
-            >
-                <div>
-                    <li>Aktuelles Review: _Review_Name_</li>
-                    <li>Meine Rolle:_Owner/Mitglied</li>
-                    <li>Rechte:Admin/ReadOnly/Read+Write</li>
-                </div>
+        <b-nav tabs >
+                <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
+                <b-nav-item active><router-link to="/reviewinfo">ReviewInfo</router-link></b-nav-item>
+                <b-nav-item><router-link to="/search">Search</router-link></b-nav-item>
+                <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
+                <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
+        
+        </b-nav>
 
-                <div class="table-title">
-                    <div class="row">
-                        <div class="col-sm-5">
-                            <h2>Teilnehmer dieses Reviews</h2>
-                        </div>
-                        <div class="col-sm-7">
-                            <div>
-                                <b-button href="#">Person zu diesem review hinzufügen/einladen</b-button>
-                            </div>
+        <b-card
+                title="Hallo (User_Name)!"
+        >
+            <div>
+                <li>Aktuelles Review: _Review_Name_</li>
+                <li>Meine Rolle:_Owner/Mitglied</li>
+                <li>Rechte:Admin/ReadOnly/Read+Write</li>
+            </div>
+
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <h2>Teilnehmer dieses Reviews</h2>
+                    </div>
+                    <div class="col-sm-7">
+                        <div>
+                            <b-button href="#">Person zu diesem review hinzufügen/einladen</b-button>
                         </div>
                     </div>
                 </div>
-                <b-table
-                        id="my-table"
-                        :items="user_items"
-                        :per-page="perPage"
-                        :current-page="currentPage"
-                        small
-                ></b-table>
+            </div>
+            <b-table
+                    id="my-table"
+                    :items="user_items"
+                    :per-page="perPage"
+                    :current-page="currentPage"
+                    small
+            ></b-table>
 
-                <div class="table-title">
-                    <div class="row">
-                        <div class="col-sm-5">
-                            <h2>Verfügbare API Keys</h2>
-                        </div>
-                        <div class="col-sm-7">
-                            <div>
-                                <b-button href="#">API Key hinzufügen</b-button>
-                            </div>
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <h2>Verfügbare API Keys</h2>
+                    </div>
+                    <div class="col-sm-7">
+                        <div>
+                            <b-button href="#">API Key hinzufügen</b-button>
                         </div>
                     </div>
                 </div>
-                <b-table
-                        id="api_table"
-                        :items="api_keys"
-                        :per-page="perPage"
-                        :current-page="currentPage"
-                        small
-                ></b-table>
+            </div>
+            <b-table
+                    id="api_table"
+                    :items="api_keys"
+                    :per-page="perPage"
+                    :current-page="currentPage"
+                    small
+            ></b-table>
 
-            </b-card>
-
-
-
-
-
-        </b-container>
+        </b-card>
     </div>
 </template>
 
@@ -87,7 +88,6 @@ export default {
         if(SessionStore.data.authKey==null){
             this.$router.push("/login")
         }
-        //this.getPersisted()
     },
     computed: {
         rows() {

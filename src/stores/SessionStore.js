@@ -1,7 +1,8 @@
 const SessionStore = {
     data: {
         userId: null,
-        authKey: "fdsfdsdsagfsagsa",
+        authKey: null,
+        reviewId: "rID"
     },
     methods: {
         setAuth(token){
