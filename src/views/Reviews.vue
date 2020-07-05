@@ -1,56 +1,31 @@
 <template>
     <div id="reviews">
-        
-        
-            <b-nav tabs >
-                <b-nav-item active><router-link to="/">Reviews</router-link></b-nav-item>
-                <b-nav-item><router-link to="/reviewinfo">ReviewInfo</router-link></b-nav-item>
-                <b-nav-item><router-link to="/search">Search</router-link></b-nav-item>
-                <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
-                <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
-        
-            </b-nav>
+        <b-nav tabs >
+            <b-nav-item active><router-link to="/">Reviews</router-link></b-nav-item>
+            <b-nav-item><router-link to="/search">Search</router-link></b-nav-item>
+            <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
+            <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
+        </b-nav>
 
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <div class="table-title">
-                <div class="row">
-                    <div class="col-sm-5">
-                        <h2>Verfügbare <b>Reviews</b></h2>
-                    </div>
-                    <div class="col-sm-7">
-                        <div>
-                            <b-button href="#">Person zu review hinzufügen/einladen</b-button>
-                            <b-button href="#">Neue Review erstellen</b-button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        
+        <b-card v-for="review in reviews" :key="review.reviewId"
+        class="m-5"
+        header="Review title"
+        header-tag="header" 
+        footer-tag="footer"
+        >
+            Teilnehmer erstellungsdatum und link zu den searches und dem scoring bereich
+            <template v-slot:footer="review">
+                <b-form-input type="text"></b-form-input>
+                <b-button @click="addUser(review)" variant="primary">Add user</b-button>
+                <b-button @click="deleteReview(review)" variant="primary">Delete review</b-button>
+            </template>
+        </b-card>
 
-            <!-- https://bootstrap-vue.org/docs/components/table -->
-            <b-table
-                    id="my-table"
-                    :items="items"
-                    :per-page="perPage"
-                    :current-page="currentPage"
-                    small
-            ></b-table>
-            <!-- aktuelle seite anzeigen --->
-            <p class="mt-3">Aktuelle Seite: {{ currentPage }}</p>
-
-            <!-- https://bootstrap-vue.org/docs/components/pagination -->
-            <b-pagination
-                    v-model="currentPage"
-                    :total-rows="rows"
-                    :per-page="perPage"
-                    aria-controls="my-table"
-            ></b-pagination>
+        
+        <b-form-input type="text" v-model="newReviewName"></b-form-input>
+        <b-form-input type="text" v-model="newReviewDescription"></b-form-input>
+        <b-button type="button" variant="primary" @click="createReview()">Create review</b-button>
     </div>
 </template>
 
@@ -60,22 +35,11 @@ import SessionStore from "../stores/SessionStore"
 
 export default {
     name: "Reviews",
-    data() {
+    data: () => {
         return {
-            perPage: 3,
-            currentPage: 1,
-            // dann analog zum beispiel wie von moham. in app.vue die andere table gemacht hat. flexible anpassen an das was wir brauchen
-            items: [
-                { id: 1, Titel: 'Bitcoin', Status: 'Abgeschlossen', icon:'' },
-                { id: 2, Titel: 'Ethereum', Status: 'In Arbeit', icon:'' },
-                { id: 3, Titel: 'Iota', Status: 'Abgeschlossen', icon:'' },
-                { id: 4, Titel: 'Xrp', Status: 'Abgeschlossen', icon:'' },
-                { id: 5, Titel: 'Xlm', Status: 'Abgeschlossen', icon:'' },
-                { id: 6, Titel: 'Crypto', Status: 'Abgeschlossen', icon:'' },
-                { id: 7, Titel: 'SmartContracts', Status: 'Abgeschlossen', icon:'' },
-                { id: 8, Titel: 'Mining', Status: 'Abgeschlossen', icon:'' },
-                { id: 9, Titel: 'TBD', Status: 'In Arbeit', icon:'' }
-            ]
+            newReviewName: "",
+            newReviewDescription: "",
+            reviews: [{reviewId:1},{reviewId:2}]
         }
     },
 
@@ -83,6 +47,33 @@ export default {
         if(SessionStore.data.authKey==null){
             this.$router.push("/login")
         }
+        else{
+            //this.$http.get(`https://vqvodc972j.execute-api.eu-central-1.amazonaws.com/dev12/users/${SessionStore.data.username}/reviews`)
+            //.then(data => {console.log("get reviews");
+            //                console.log(data.data.reviews);
+            //                this.reviews = data.data.reviews;
+            //                })
+            //.catch(error => {console.log(error);}); 
+            console.log("else")           
+        }
+    },
+
+    methods: {
+        createReview() {
+            this.$http.post("https://rct0t0kff3.execute-api.eu-central-1.amazonaws.com/dev/review",{"name": this.newReviewName, "description": this.newReviewDescription})
+            .then(data => {console.log("add review");
+                            console.log(data.data);
+                            })
+            .catch(error => {console.log(error);});  
+        },
+
+        deleteReview(review) {
+            console.log(review)
+        },
+
+        addUserToReview(review) {
+            console.log(review)
+        },
     },
 
     computed: {
@@ -92,101 +83,8 @@ export default {
     }
 }
 </script>
-<!--- TODO: tabellen layout noch etwas anpassen, je nach seite verschiebt es sich etwas -->
-<style scoped>
-
-    .table-header {
-        background: #fff;
-        padding: 20px 25px;
-        margin: 30px 0;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0,0,0,.05);
-    }
-    .table-title {
-
-        background: #96CDCD;
-        color: white;
-        padding: 16px 30px;
-        padding-bottom: 20px;
-        margin: -20px -20px 10px;
-        border-radius: 5px 5px 1 1;
-    }
-    .table-title h2 {
-        font-size: 24px;
-        margin: 7px 0 0;
-    }
-    .table-title .btn {
-        background: white;
-        color: black;
-        float: right;
-        font-size: 13px;
-        min-width: 50px;
-        border-radius: 2px;
-        margin-left: 10px;
-        border: none;
-    }
-    .table-title .btn:hover, .table-title .btn:focus {
-        color: deepskyblue;
-        background: white;
-    }
-    .table-title .btn i {
-        float: left;
-        font-size: 21px;
-        margin-right: 5px;
-    }
-    .table-title .btn span {
-        float: left;
-        margin-top: 3px;
-    }
 
 
-    table.table tr th:first-child {
-        width: 60px;
-    }
-    table.table tr th:last-child {
-        width: 100px;
-    }
-
-    table.table td a:hover {
-        color: #96CDCD;
-    }
-    table.table td a.add {
-        color: green;
-    }
-    table.table td a.delete {
-        color: red;
-    }
-
-
-    /*
-    pagination noch anpassen
-     */
-
-    .pagination li a {
-        border: none;
-        font-size: 13px;
-        min-width: 30px;
-        min-height: 30px;
-        color: grey;
-        margin: 0 2px;
-        line-height: 30px;
-        border-radius: 2px !important;
-        text-align: center;
-        padding: 0 6px;
-    }
-    .pagination li a:hover {
-        color: #666;
-    }
-    .pagination li.active a, .pagination li.active a.page-link {
-        background: #96CDCD;
-    }
-    .pagination li.active a:hover {
-        background: #96CDCD;
-    }
-
-    .pagination li i {
-        font-size: 16px;
-        padding-top: 6px
-    }
+<style >
 
 </style>

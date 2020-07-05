@@ -2,7 +2,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 import Reviews from '../views/Reviews.vue'
-import ReviewInfo from '../views/ReviewInfo.vue'
 import Search from '../views/Search.vue'
 import Score from '../views/Score.vue'
 import Login from '../views/Login.vue'
@@ -35,11 +34,6 @@ Vue.use(VueRouter)
     path: '/login',
     name: 'Login',
     component: Login
-  },
-  {
-    path: '/reviewinfo',
-    name: 'ReviewInfo',
-    component: ReviewInfo
   },
   {
     path: '/about',

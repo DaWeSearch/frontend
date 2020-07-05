@@ -1,7 +1,7 @@
 const SessionStore = {
     data: {
-        userId: null,
-        authKey: null,
+        username: "testusername",
+        authKey: "testauthkey",
         reviewId: "rID"
     },
     methods: {

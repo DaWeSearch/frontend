@@ -2,7 +2,6 @@
     <div id="app">
         <b-nav tabs >
             <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
-            <b-nav-item disabled><router-link to="/reviewinfo">ReviewInfo</router-link></b-nav-item>
             <b-nav-item disabled><router-link to="/search">Search</router-link></b-nav-item>
             <b-nav-item disabled> <router-link to="/score">Score</router-link></b-nav-item>
             <b-nav-item active><router-link to="/about">About</router-link></b-nav-item>
@@ -18,8 +17,10 @@
                 <b-form @submit="onSubmit">
                     <b-form-input class="mb-2" required v-model="username" placeholder="Username"></b-form-input>
                     <b-form-input class="mb-2" required v-model="password" placeholder="Password" type="password"></b-form-input>
+                    <b-alert v-model="loginError" variant="danger" dismissible>Could not log in!</b-alert>
                     <b-button type="submit" variant="primary">Submit</b-button>
                 </b-form>
+
 
                 <template v-slot:footer>
                     <router-link to="/signup">Signup</router-link>
@@ -38,16 +39,23 @@ export default {
     data: () => {
         return {
             username: "",
-            password: ""
+            password: "",
+            loginError: false
         };
     },
     methods: {
         onSubmit(evt){
             evt.preventDefault()
             this.$http.post('https://vocxdyh56a.execute-api.eu-central-1.amazonaws.com/dev/login',{"username":this.username,"password":this.password})
-            .then(data => {console.log("hier ist ein signupresponse");SessionStore.data.authKey=data})
-            .catch(error => console.log(error));
+            .then(data => {console.log("hier ist ein signupresponse");
+                            SessionStore.data.authKey=data.data;
+                            SessionStore.data.username=this.username;
+                            console.log(SessionStore.data.authKey);
+                            this.$router.push("/")
+                            })
+            .catch(error => {console.log(error);this.loginError=true});
         },
+        
         printAuthKey(){
             console.log(SessionStore.data.authKey)
         }
