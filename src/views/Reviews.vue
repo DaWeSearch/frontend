@@ -18,8 +18,8 @@
             <p>Teilnehmer erstellungsdatum und link zu den searches und dem scoring bereich</p>
 
 
-            <b-nav-item><router-link to="/search">Search</router-link></b-nav-item>
-            <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
+            <b-button @click="search(review)">Search for Publications</b-button>
+            <router-link to="/score">Score</router-link>
             
             <template v-slot:footer="review">
                 <b-form-input type="text"></b-form-input>
@@ -86,6 +86,11 @@ export default {
     },
 
     methods: {
+        search(review){
+            SessionStore.data.reviewId = review["_id"]["$oid"]
+            this.$router.push("/search") // später reviews/reviewname/search waere cool
+        },
+
         createReview() {
             this.$http.post("https://vqvodc972j.execute-api.eu-central-1.amazonaws.com/dev12/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
             .then(data => {console.log("add review");
