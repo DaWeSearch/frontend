@@ -8,18 +8,20 @@
         </b-nav>
 
         
-        <b-card v-for="review in reviews" :key="review.reviewId"
+        <b-card v-for="review in reviews" :key="getReviewId(review)"
         class="m-5"
         :header="review.name"
         header-tag="header" 
         footer-tag="footer"
-        >
+        >   
+            <p>{{review.owner}}</p>
             <p>{{review.description}}</p>
+            <p>{{review.result_collection}}</p>
             <p>Teilnehmer erstellungsdatum und link zu den searches und dem scoring bereich</p>
 
 
-            <b-button @click="search(review)">Search for Publications</b-button>
-            <router-link to="/score">Score</router-link>
+            <b-button @click="search(review)">Search and select publications</b-button>
+            <b-button @click="score(review)">Score selected publications</b-button>
             
             <template v-slot:footer="review">
                 <b-form-input type="text"></b-form-input>
@@ -45,7 +47,7 @@ export default {
         return {
             newReviewName: "",
             newReviewDescription: "",
-            reviews: [  {"name": "New Review 1",
+            reviews: [  {"name": "New Review 1", // static for development
                         "owner": "testu",
                         "result_collection": "results-None",
                         "description": "Add review test 1",
@@ -75,28 +77,42 @@ export default {
             this.$router.push("/login")
         }
         else{
-            //this.$http.get(`https://vqvodc972j.execute-api.eu-central-1.amazonaws.com/dev12/users/${SessionStore.data.username}/reviews`)
-            //.then(data => {console.log("get reviews");
-            //                console.log(data.data.reviews);
-            //                this.reviews = data.data.reviews;
-            //                })
-            //.catch(error => {console.log(error);}); 
+            //this.getReviews();                              //AUTO GET REVIEWS REQUESTS INACTIVE FOR DEVELOPEMENT
             console.log("else")           
         }
     },
 
     methods: {
+        getReviews(){
+            this.$http.get(`https://vqvodc972j.execute-api.eu-central-1.amazonaws.com/dev12/users/${SessionStore.data.username}/reviews`)
+            .then(data => {console.log("get reviews");
+                            console.log(data.data.reviews);
+                            this.reviews = data.data.reviews[0];//reviews sind in ansonsten lehrer liste irgendwie
+                            })
+            .catch(error => {console.log(error);}); 
+        },
+
+        getReviewId(review){
+            return review["_id"]["$oid"]
+        },
+
         search(review){
-            SessionStore.data.reviewId = review["_id"]["$oid"]
+            SessionStore.data.reviewId = this.getReviewId(review)
             this.$router.push("/search") // später reviews/reviewname/search waere cool
+        },
+
+        score(review){
+            SessionStore.data.reviewId = this.getReviewId(review)
+            this.$router.push("/score") // später reviews/reviewname/score waere cool
         },
 
         createReview() {
             this.$http.post("https://vqvodc972j.execute-api.eu-central-1.amazonaws.com/dev12/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
             .then(data => {console.log("add review");
                             console.log(data.data);
+                            this.reviews.push(data.data)
                             })
-            .catch(error => {console.log(error);});  
+            .catch(error => {console.log(error);});
         },
 
         deleteReview(review) {

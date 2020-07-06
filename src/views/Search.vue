@@ -7,12 +7,12 @@
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
     
         </b-nav>
-    <!--<b-row>                                                                                           
+        <b-row>                                                                                           
             <b-col ></b-col>
             <b-col ><b-button variant="primary" @click="persist">Persist these {{ pageLength*2 }} out of {{ totalNum }} results</b-button></b-col>
             <b-col ><b-button variant="primary" @click="getPersisted">Retrieve persisted Results</b-button></b-col>
             <b-col ></b-col>
-        </b-row>-->
+        </b-row>
 
         <div class="mt-5 d-flex">
             <b-form @submit="onSubmit">
@@ -175,6 +175,10 @@ export default {
     methods: {
         onSubmit(evt){
             evt.preventDefault()
+        },
+
+        persist(){
+
         },
 
         getPersisted(){
