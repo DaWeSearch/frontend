@@ -84,7 +84,7 @@ export default {
 
     methods: {
         getReviews(){
-            this.$http.get(`https://vqvodc972j.execute-api.eu-central-1.amazonaws.com/dev12/users/${SessionStore.data.username}/reviews`)
+            this.$http.get(`/users/${SessionStore.data.username}/reviews`)
             .then(data => {console.log("get reviews");
                             console.log(data.data.reviews);
                             this.reviews = data.data.reviews[0];//reviews sind in ansonsten lehrer liste irgendwie
@@ -107,7 +107,7 @@ export default {
         },
 
         createReview() {
-            this.$http.post("https://vqvodc972j.execute-api.eu-central-1.amazonaws.com/dev12/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
+            this.$http.post("/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
             .then(data => {console.log("add review");
                             console.log(data.data);
                             this.reviews.push(data.data)

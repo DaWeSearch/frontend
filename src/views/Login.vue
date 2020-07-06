@@ -46,7 +46,7 @@ export default {
     methods: {
         onSubmit(evt){
             evt.preventDefault()
-            this.$http.post('https://vocxdyh56a.execute-api.eu-central-1.amazonaws.com/dev/login',{"username":this.username,"password":this.password})
+            this.$http.post('/login',{"username":this.username,"password":this.password})
             .then(data => {console.log("hier ist ein signupresponse");
                             SessionStore.data.authKey=data.data;
                             SessionStore.data.username=this.username;

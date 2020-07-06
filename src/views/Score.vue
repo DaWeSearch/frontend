@@ -121,7 +121,7 @@ export default {
 
     methods: {
         getPersisted(){
-            this.$http.get('https://pavdg6jfrj.execute-api.eu-central-1.amazonaws.com/dev4/results?review_id=5ecd4bc497446f15f0a85f0d')
+            this.$http.get('/results?review_id=5ecd4bc497446f15f0a85f0d')
             //.then(response => { return console.log(response),response.json(); })
             .then(data => {
                 //console.log(data)

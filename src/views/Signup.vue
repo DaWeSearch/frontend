@@ -50,7 +50,7 @@ export default {
         onSubmit(evt){
             evt.preventDefault()
             if(this.passwordsEqual()){
-                this.$http.post('https://vocxdyh56a.execute-api.eu-central-1.amazonaws.com/dev/users',this.form)
+                this.$http.post('/users',this.form)
                 .then(data => {console.log("hier ist ein signupresponse");console.log(data)})
                 .catch(error => console.log(error));
             
