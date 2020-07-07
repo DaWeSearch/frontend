@@ -29,7 +29,8 @@
         <!-- erstes beispiel-->
         <div>
             <cloud :data="words"
-                   :fontSizeMapper="fontSizeMapper" />
+                   :fontSizeMapper="fontSizeMapper"
+                    />
         </div>
         <!-- zweites bsp -->
         <wordcloud
@@ -40,6 +41,17 @@
                 :showTooltip="true"
                 :wordClick="wordClickHandler">
         </wordcloud>
+        <b-card
+        class="mx-auto">
+        <MapChart
+                :countryData="{'US': 4, 'CA': 7, 'GB': 8, 'IE': 14, 'ES': 21, 'DE':90 }"
+                highColor="#ff0000"
+                lowColor="#aaaaaa"
+                countryStrokeColor="#909090"
+                defaultCountryFillColor="#dadada"
+        ></MapChart>
+        </b-card>
+
 
     </div>
 </template>
@@ -51,7 +63,7 @@ import SessionStore from "../stores/SessionStore"
 // https://github.com/d3/d3/wiki
 import Cloud from 'vue-d3-cloud'
 import wordcloud from 'vue-wordcloud'
-
+import MapChart from 'vue-map-chart'
 export default {
     name: 'Login',
     data: () => {
@@ -60,18 +72,29 @@ export default {
             password: "",
             myColors: ['#000000', '#0000000', '#0000000', '#0000000'],
             defaultWords: [
-                {"name": "Cat","value": 26},
-                {"name": "fish","value": 19},
-                {"name": "things","value": 18},
-                {"name": "look","value": 16},
-                {"name": "two","value": 15},
+                {"name": "Bitcoin","value": 12},
+                {"name": "Ethereum","value": 14},
+                {"name": "Blockchain","value": 15},
+                {"name": "Dawesys","value": 17},
+                {"name": "ProgPra","value": 21},
+                {"name": "serverless","value": 13},
+                {"name": "aws","value": 12},
+                {"name": "cookies","value": 12},
+                {"name": "mathe","value": 11},
+                {"name": "bib","value": 7},
+                {"name": "mensa","value": 8},
+                {"name": "TU ","value": 4},
+                {"name": "HU","value": 3},
             ],
             words: [
                 { text: 'Bitcoin', value: 1000 },
                 { text: 'Ethereum', value: 200 },
                 { text: 'blockchain', value: 800 },
                 { text: 'very cool', value: 1000000 },
-                { text: 'dawesys', value: 100 },
+                { text: 'dawesys', value: 463 },
+                { text: 'corona', value: 234 },
+                { text: 'gruppenarbeit', value: 142 },
+                { text: 'kekse', value: 100 },
             ],
 
             //größe der wörter beispiel 1
@@ -95,6 +118,7 @@ export default {
     components: {
         Cloud,
         wordcloud,
+        MapChart,
     },
 }
 </script>
