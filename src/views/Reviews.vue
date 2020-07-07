@@ -25,7 +25,7 @@
             
             <template v-slot:footer="review">
                 <b-form-input type="text"></b-form-input>
-                <b-button @click="addUser(review)" variant="primary">Add user</b-button>
+                <b-button @click="addUserToReview(review)" variant="primary">Add user</b-button>
                 <b-button @click="deleteReview(review)" variant="primary">Delete review</b-button>
             </template>
         </b-card>
@@ -70,7 +70,7 @@ export default {
                         }
             ]
         }
-    },
+        },
 
     beforeMount() {
         if(SessionStore.data.authenticationToken==null){
@@ -117,10 +117,20 @@ export default {
         },
 
         deleteReview(review) {
+            this.$http.delete(`review/${SessionStore.data.reviewId}`)
+                .then(data => {console.log("add review");
+                    console.log(data.data);
+                    this.reviews.push(data.data)
+                })
             console.log(review)
         },
 
         addUserToReview(review) {
+            this.$http.post(`/review/${SessionStore.data.reviewId}/collaborator`, {"username": SessionStore.data.username})
+                .then(data => {console.log("add review");
+                    console.log(data.data);
+                    this.reviews.push(data.data)
+                })
             console.log(review)
         },
     },
