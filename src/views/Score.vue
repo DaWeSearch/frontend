@@ -7,12 +7,6 @@
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
     
         </b-nav>
-    <!--<b-row>                                                                                           
-            <b-col ></b-col>
-            <b-col ><b-button variant="primary" @click="persist">Persist these {{ pageLength*2 }} out of {{ totalNum }} results</b-button></b-col>
-            <b-col ><b-button variant="primary" @click="getPersisted">Retrieve persisted Results</b-button></b-col>
-            <b-col ></b-col>
-        </b-row>-->
         
         <b-table fixed hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
@@ -114,18 +108,18 @@ export default {
 
 
     beforeMount() {
-        if(SessionStore.data.authKey==null){
+        if(SessionStore.data.authenticationToken==null){
             this.$router.push("/login")
+        }
+        else{
+            //getPersisted();
         }
     },
 
     methods: {
         getPersisted(){
             this.$http.get('/results?review_id=5ecd4bc497446f15f0a85f0d')
-            //.then(response => { return console.log(response),response.json(); })
             .then(data => {
-                //console.log(data)
-                this.perso = data
                 this.items = data.data.results
             }).catch(error => console.log(error))
         },

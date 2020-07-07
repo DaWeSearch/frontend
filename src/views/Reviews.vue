@@ -73,12 +73,13 @@ export default {
     },
 
     beforeMount() {
-        if(SessionStore.data.authKey==null){
+        if(SessionStore.data.authenticationToken==null){
+            console.log("review to login")
             this.$router.push("/login")
         }
         else{
             //this.getReviews();                              //AUTO GET REVIEWS REQUESTS INACTIVE FOR DEVELOPEMENT
-            console.log("else")           
+            console.log("load reviews")           
         }
     },
 

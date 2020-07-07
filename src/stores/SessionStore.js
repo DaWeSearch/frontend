@@ -1,28 +1,14 @@
 const SessionStore = {
-    data: {
-        username: null,
-        authKey: null,
-        reviewId: null
-    },
-    methods: {
-        setAuth(token){
-            SessionStore.authKey = token
-        }
-
-/*
-        myLoginRoutine = user => new Promise ((resolve, reject) => {
-            axios({url: 'auth', data: user, method: 'POST' })
-              .then(resp => {
-                const token = resp.data.token
-                localStorage.setItem('user-token', token) // store the token in localstorage
-                resolve(resp)
-              })
-            .catch(err => {
-              localStorage.removeItem('user-token') // if the request fails, remove any possible user token if possible
-              reject(err)
-            })
-        })*/
+  data: {
+    username: "testu",
+    authenticationToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3R1IiwiZXhwIjoxNTk0MDkyMDgyfQ.DIhEzSXzqEfbJ-EKDrysuCRh_XMRIFuvTZ12zbOcx1g",
+    reviewId: null
+  },
+  methods: {
+    setAuth(token){
+      SessionStore.authenticationToken = token
     }
+  }
 }
 
 export default SessionStore;

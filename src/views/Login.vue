@@ -52,14 +52,16 @@ export default {
                             SessionStore.data.username=this.username;
                             console.log(SessionStore.data.authKey);
                             this.$router.push("/")
-                            })
-            .catch(error => {console.log(error);this.loginError=true});
-        },
-        
-        printAuthKey(){
-            console.log(SessionStore.data.authKey)
+                            }
+            )
+            .catch(error => {console.log(error);
+                            this.loginError=true;
+                            SessionStore.data.authenticationToken=null;
+                            SessionStore.data.username=null;
+                            }
+                    );
         }
-    },
+    }
 }
 </script>
 
