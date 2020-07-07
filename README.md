@@ -1,5 +1,15 @@
 # dawesearch
 
+
+## additional Setup for visualization:
+```
+npm install vue-d3-cloud or
+npm install vue-wordcloud
+npm install vue-map-chart
+```
+
+
+
 ## Project setup
 ```
 npm install
