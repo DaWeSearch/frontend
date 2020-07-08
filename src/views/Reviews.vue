@@ -9,9 +9,15 @@
 
         
         <b-card v-for="review in reviews" :key="getReviewId(review)"
+                overlay
+                img-src="https://cdn.pixabay.com/photo/2015/07/31/11/45/library-869061_1280.jpg"
+                img-alt="Card Image"
+                text-variant="white"
+                title= "{review.owner}"
+                sub-title="Subtitle"
         class="m-5"
         :header="review.name"
-        header-tag="header" 
+        header-tag="header"
         footer-tag="footer"
         >   
             <p>{{review.owner}}</p>
