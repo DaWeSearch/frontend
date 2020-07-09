@@ -7,21 +7,19 @@
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
         </b-nav>
 
-        
+        <!-- img-src="https://cdn.pixabay.com/photo/2015/07/31/11/45/library-869061_1280.jpg" -->
         <b-card v-for="review in reviews" :key="getReviewId(review)"
                 overlay
-                img-src="https://cdn.pixabay.com/photo/2015/07/31/11/45/library-869061_1280.jpg"
+                img-src="https://upload.wikimedia.org/wikipedia/commons/3/3e/UB_TU_Berlin_Innenhof.JPG"
                 img-alt="Card Image"
                 text-variant="white"
-                title= "{review.owner}"
-                sub-title="Subtitle"
+                :title= review.owner
+                :sub-title=review.description
         class="m-5"
         :header="review.name"
         header-tag="header"
         footer-tag="footer"
-        >   
-            <p>{{review.owner}}</p>
-            <p>{{review.description}}</p>
+        >
             <p>{{review.result_collection}}</p>
             <p>Teilnehmer erstellungsdatum und link zu den searches und dem scoring bereich</p>
 
@@ -56,21 +54,21 @@ export default {
             reviews: [  {"name": "New Review 1", // static for development
                         "owner": "testu",
                         "result_collection": "results-None",
-                        "description": "Add review test 1",
+                        "description": "Description 1",
                         "_id": {"$oid": "5f01fde055e9c2fbc462ad0a"},
                         "_cls": "functions.db.models.Review"
                         },
                         {"name": "New Review 2",
                         "owner": "testu",
                         "result_collection": "results-None",
-                        "description": "Add review test 2",
+                        "description": "Description 2",
                         "_id": {"$oid": "5f01fde055e9c2fbc462ad0b"},
                         "_cls": "functions.db.models.Review"
                         },
                         {"name": "New Review 3",
                         "owner": "testu",
                         "result_collection": "results-None",
-                        "description": "Add review test 3",
+                        "description": "Description 3",
                         "_id": {"$oid": "5f01fde055e9c2fbc462ad0c"},
                         "_cls": "functions.db.models.Review"
                         }

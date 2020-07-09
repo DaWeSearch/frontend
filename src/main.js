@@ -7,7 +7,7 @@ import router from './router'
 
 import Axios from 'axios'
 Vue.prototype.$http = Axios;
-Axios.defaults.baseURL = " https://vvt6vdg772.execute-api.eu-central-1.amazonaws.com/"
+Axios.defaults.baseURL = "https://s7svdjh4c2.execute-api.eu-central-1.amazonaws.com/dev"
 
 Vue.config.productionTip = false
 
