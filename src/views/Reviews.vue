@@ -47,7 +47,7 @@ export default {
         return {
             newReviewName: "",
             newReviewDescription: "",
-            reviews: [  {"name": "New Review 1", // static for development
+            reviews: [  /*{"name": "New Review 1", // static for development
                         "owner": "testu",
                         "result_collection": "results-None",
                         "description": "Add review test 1",
@@ -67,7 +67,7 @@ export default {
                         "description": "Add review test 3",
                         "_id": {"$oid": "5f01fde055e9c2fbc462ad0c"},
                         "_cls": "functions.db.models.Review"
-                        }
+                        }*/
             ]
         }
     },
@@ -78,7 +78,7 @@ export default {
             this.$router.push("/login")
         }
         else{
-            //this.getReviews();                              //AUTO GET REVIEWS REQUESTS INACTIVE FOR DEVELOPEMENT
+            this.getReviews();                              //AUTO GET REVIEWS REQUESTS INACTIVE FOR DEVELOPEMENT
             console.log("load reviews")           
         }
     },
@@ -117,7 +117,9 @@ export default {
         },
 
         deleteReview(review) {
-            console.log(review)
+            this.$http.delete(`/review/${review.getReviewId}`)
+            .then(data => console.log(data))
+            .catch(error => {console.log(error);});
         },
 
         addUserToReview(review) {
