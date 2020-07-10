@@ -144,6 +144,7 @@ export default {
             pagecount: 0,
             displayedPage: 1,
             pageLength: 50,
+            queryUsedForSearch: null,
             totalNum: 0,// num of persisted entries on db
             wrapperResponses: null,
             fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri'],
@@ -183,11 +184,11 @@ export default {
         
         buildQuery(){
             let query = {
-                "search_groups": [{"search_terms":this.exclude_terms,"match":"NOT"},
-                                    ...this.search_groups
+                "search_groups": [{"search_terms":[...this.exclude_terms],"match":"NOT"},
+                                    ...JSON.parse(JSON.stringify(this.search_groups)) // deepcopy since user can change category after submitting query
                                 ].filter( searchGroup => searchGroup.search_terms.length>0),
                 "match": "AND",
-                "fields": this.selectedSearchFields,
+                "fields": [...this.selectedSearchFields],// copy since user can change selectedSearchFields after submitting query
             };
             
             return query
@@ -196,6 +197,7 @@ export default {
         processWrapperResponses(){
             console.log(this.wrapperResponses)
             this.tableItems = []
+            this.totalNum = 0
             this.wrapperResponses.forEach(d=>{
                 this.totalNum += parseInt(d.result.total)
                 console.log(`d.result.total ${d.result.total}`)
@@ -205,10 +207,9 @@ export default {
             })
         },
 
-        onSubmitSearch(evt){
-            evt.preventDefault();
-            
-            this.$http.post(`/query?page=${this.displayedPage}`,{"search":this.buildQuery()}) /*?page_length=${this.pageLength}*/
+        onSubmitSearch(){
+            this.queryUsedForSearch = this.buildQuery()
+            this.$http.post(`/query?page=${this.displayedPage}&page_length=${this.pageLength}`,{"search":this.queryUsedForSearch})
             .then(data => {
                 this.wrapperResponses = data.data
                 this.processWrapperResponses()
@@ -220,7 +221,9 @@ export default {
         },
 
         persist(){
-            
+            this.$http.post(`persist/${SessionStore.data.reviewId}/list`,{"results":this.tableItems,"search":this.queryUsedForSearch})
+            .then(data => console.log(`persisted ${data}`))
+            .catch(error => console.log(error))
         },
     }
 }
