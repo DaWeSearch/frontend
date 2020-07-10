@@ -2,99 +2,103 @@
     <div class="search">
         <b-nav tabs >
             <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
-            <b-nav-item active><router-link to="/search">Search</router-link></b-nav-item>
-            <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
+            <b-nav-item active disabled><router-link to="/search">Search</router-link></b-nav-item>
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
-    
+            <b-button squared class="ml-auto" variant="">Log out</b-button>
         </b-nav>
-        <b-row>                                                                                           
-            <b-col ></b-col>
-            <b-col ><b-button variant="primary" @click="persist">Persist these {{ pageLength*2 }} out of {{ totalNum }} results</b-button></b-col>
-            <b-col ><b-button variant="primary" @click="getPersisted">Retrieve persisted Results</b-button></b-col>
-            <b-col ></b-col>
-        </b-row>
 
-        <div class="mt-5">
-            <b-form @submit="onSubmit">
+        <b-container fluid>
+           
+            <b-row>
+                <b-col class="ml-5" cols="3">
+                    <b-input-group class="my-5">
+                        <b-form-input v-model="newSearchGroup" @keypress.enter="addSearchGroup()" placeholder="First term of new search category to include" ></b-form-input>
+                        <b-input-group-append>
+                            <b-button variant="info" @click="addSearchGroup()"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                        </b-input-group-append>
+                    </b-input-group>
+                </b-col>
+            </b-row>
 
+            <b-row>
+                <b-col cols="2" class="ml-5 mb-3">
+                    <b-card
+                    header="Exclude category"
+                    header-tag="header" 
+                    footer-tag="footer"
+                    >
+                        <p v-for="(term,index) in exclude_terms" :key="term" class="mb-2">
+                            {{term}}
+                            <b-icon-dash-circle @click="removeTerm(exclude_terms,index)" variant="danger"></b-icon-dash-circle>
+                        </p>
 
-            <b-card 
-            class="mx-auto"
-            header-tag="header" 
-            footer-tag="footer"
-            >
-                <template v-slot:header>
-                    <p>Aspects</p>
-                </template>
+                        <template v-slot:footer>
+                            <b-input-group>
+                                <b-form-input v-model="newField" @keypress.enter="addTerm(exclude_terms)" placeholder="Term to exclude"></b-form-input>
+                                <b-input-group-append>
+                                    <b-button variant="outline-danger" @click="addTerm(exclude_terms)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                </b-input-group-append>
+                            </b-input-group>
+                        </template>
+                    </b-card>
+                </b-col>
 
-                    <b-row>
-                    <!--                                                              EXCLUDE
-
-                    <b-col>
-                        <b-card 
-                        class="mx-auto"
-                        header="exclude"
-                        header-tag="header" 
-                        footer-tag="footer"
-                        >
-
-                            
-                                <p v-for="synonym in aspect.search_terms" :key="synonym" class="mb-2">{{synonym}}</p>
-
-                            <template v-slot:footer>
-                                <b-form-input v-model="newField" placeholder="First element of new group"></b-form-input> <b-button>Add search group</b-button>
-                            </template>
-                        </b-card>
-                    </b-col>-->
-
-                    <b-col v-for="aspect in searchObject.aspects.search_groups" :key="aspect.search_terms" cols="6">
-                    <b-card 
-                    class="mx-auto"
+                <b-col v-for="(searchGroup,index) in search_groups" :key="searchGroup.search_terms[0]" cols="2" class="ml-5 mb-3">
+                    <b-card
                     header-tag="header" 
                     footer-tag="footer"
                     >
                         <template v-slot:header>
-                            <b-button-group>
-                                <b-button :variant="upVariant(searchObject.aspects.match)" @click="upClicked(searchObject.aspects)">AND</b-button>  <!-- wenn ausgewählt switch zu variant="outline-success"-->
-                                <b-button :variant="downVariant(searchObject.aspects.match)" @click="downClicked(searchObject.aspects)">OR</b-button>  <!-- wenn ausgewählt switch zu variant="outline-danger"-->
-                            </b-button-group>
+                            Include category
+                            <b-icon-dash-circle v-if="search_groups.length>1" @click="removeSearchGroup(index)" variant="danger"></b-icon-dash-circle>
                         </template>
 
-                        
-                            <p v-for="synonym in aspect.search_terms" :key="synonym" class="mb-2">{{synonym}}</p>
+                        <p v-for="(term,index) in searchGroup.search_terms" :key="term" class="mb-2">
+                            {{term}}
+                            <b-icon-dash-circle @click="removeTerm(searchGroup.search_terms,index)" variant="danger"></b-icon-dash-circle>
+                        </p>
 
                         <template v-slot:footer>
-                            <b-form-input v-model="newField" placeholder="First element of new group"></b-form-input> <b-button>Add search group</b-button>
+                            <b-input-group>
+                                <b-form-input v-model="newField" @keypress.enter="addTerm(searchGroup.search_terms)" placeholder="Add term to category"></b-form-input>
+                                <b-input-group-append>
+                                    <b-button variant="info" @click="addTerm(searchGroup.search_terms)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                </b-input-group-append>
+                            </b-input-group>
                         </template>
                     </b-card>
-                    </b-col>
+                </b-col>
+            </b-row>
 
-                    </b-row>
+            <b-row class="my-5 ml-5">
+                <b-col cols="2">
+                    Search in
+                    <b-form-select v-model="selectedSearchFields" :options="searchFieldOptions"></b-form-select>
+                </b-col>
+                
+                <b-col cols="1">
+                    Page
+                    <b-form-input v-model="displayedPage" placeholder="Page"></b-form-input>
+                </b-col>
 
-                <template v-slot:footer>
-                    <b-form-input v-model="newField" placeholder="First element of new group"></b-form-input> <b-button>Add search group</b-button>
-                </template>
-            </b-card>
-            
-            <b-button type="submit" variant="primary">Submit</b-button>
-            
-            
-            </b-form>
-        </div>
+                <b-col cols="1">
+                    <b-button @click="onSubmitSearch" variant="primary">Search</b-button>
+                </b-col>
 
-
-
-
-
-
-
-
-
-
-
+                <b-col cols="8"></b-col>
+            </b-row>
+        </b-container>
         
-        
-        <b-table fixed hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
+        <b-container fluid v-if="tableItems.length>0">
+            <b-button class="my-3" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
+
+            <p v-for="wrapperResponse in wrapperResponses" :key="wrapperResponse.records[0].publisher">
+                {{ wrapperResponse.records[0].publisher }}: {{wrapperResponse.result.total}}
+            </p>
+
+        </b-container>
+
+        <b-table v-if="tableItems.length>0" fixed hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
             <template v-slot:cell(uri)="row">
                 <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">{{row.item.uri}}</b-link>
@@ -107,7 +111,7 @@
             <template v-slot:row-details="row">
                 <b-row>
                     <b-col cols="1"></b-col>
-                    <b-col cols="10"><p>{{row.item.abstract}}</p></b-col>
+                    <b-col cols="10"><p>{{row.item.abstract ? row.item.abstract : "No abstract text provided"}}</p></b-col>
                     <b-col cols="1"></b-col>
                 </b-row>
             </template>
@@ -123,38 +127,27 @@ export default {
     name: 'Search',
     data: () => {
         return {
-            field:"",
+            newSearchGroup:"",
             newField: "",
-            searchObject: {
-                "aspects": {
-                    "search_groups": [
-                        {
-                            "search_terms": ["blockchain", "distributed ledger"],
-                            "match": "OR"
-                        },
-                        {
-                            "search_terms": ["energy", "infrastructure", "smart meter"],
-                            "match": "OR"
-                        }
-                    ],
-                    "match": "AND"
-                },
-                "page": 1,
-                "page_length": 100
-            },
-            fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri'],
-            items: [{'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-                {'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-                {'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-                {'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."}],
-            text: "",
+            exclude_terms: [],
+            search_groups: [{"search_terms":[],"match":"OR"}],
+            selectedSearchFields: ["all"],
+            searchFieldOptions: [{ value: ["all"], text: 'all allowed fields' },  //option groups auch interessant siehe form-select docs
+                                { value: ["keywords"], text: 'keywords only' },
+                                { value: ["title"], text: 'title only' },
+                                { value: ["abstract"], text: 'abstract only' },
+                                { value: ["keywords","title"], text: 'keywords and title' },
+                                { value: ["keywords","abstract"], text: 'keywords and abstract' },
+                                { value: ["title","abstract"], text: 'title and abstract' },
+                                { value: ["keywords","title","abstract"], text: 'keywords,title and abstract' }
+                                ],
             pagecount: 0,
             displayedPage: 1,
-            pageLength: 100,
-            scoreUp: null,
-            perso: null,
-            totalNum: 0// num of persisted entries on db
-            //user_id,reviewinternal_user_id,review_id
+            pageLength: 50,
+            totalNum: 0,// num of persisted entries on db
+            wrapperResponses: null,
+            fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri'],
+            tableItems: []
         };
     },
 
@@ -166,19 +159,59 @@ export default {
     },
 
     methods: {
-        onSubmit(evt){
-            evt.preventDefault()
+        addSearchGroup(){
+            if(this.newSearchGroup!=""){
+                this.search_groups.push({"search_terms":[this.newSearchGroup],"match":"OR"})
+            }
+            this.newSearchGroup=""
         },
 
-        persist(){
-
+        removeSearchGroup(index){
+            this.search_groups.splice(index,1)
         },
 
-        getPersisted(){
-            this.$http.get('/results?review_id=5ecd4bc497446f15f0a85f0d')
+        addTerm(searchTerms){
+            if(this.newField!="" && !searchTerms.includes(this.newField)){
+                searchTerms.push(this.newField)
+            }
+            this.newField=""
+        },
+
+        removeTerm(group,index){
+            group.splice(index,1)
+        },
+        
+        buildQuery(){
+            let query = {
+                "search_groups": [{"search_terms":this.exclude_terms,"match":"NOT"},
+                                    ...this.search_groups
+                                ].filter( searchGroup => searchGroup.search_terms.length>0),
+                "match": "AND",
+                "fields": this.selectedSearchFields,
+            };
+            
+            return query
+        },
+
+        processWrapperResponses(){
+            console.log(this.wrapperResponses)
+            this.tableItems = []
+            this.wrapperResponses.forEach(d=>{
+                this.totalNum += parseInt(d.result.total)
+                console.log(`d.result.total ${d.result.total}`)
+                if(d.records.length > 0){
+                    this.tableItems.push(...d.records) 
+                }
+            })
+        },
+
+        onSubmitSearch(evt){
+            evt.preventDefault();
+            
+            this.$http.post(`/query?page=${this.displayedPage}`,{"search":this.buildQuery()}) /*?page_length=${this.pageLength}*/
             .then(data => {
-                this.perso = data
-                this.items = data.data.results
+                this.wrapperResponses = data.data
+                this.processWrapperResponses()
             }).catch(error => console.log(error))
         },
 
@@ -186,46 +219,9 @@ export default {
             row._showDetails=!row._showDetails;
         },
 
-        upClicked(item){
-            if(item.match==true){
-                item.match=null
-            } else {
-                item.match=true
-            }
-
+        persist(){
+            
         },
-
-        downClicked(item){
-            if(item.match==false){
-                item.match=null
-            } else {
-                item.match=false
-            }
-
-        },
-
-        upVariant(score){
-            if(score==true){
-                return "outline-success"
-            }
-            return "light"
-        },
-
-        downVariant(score){
-            if(score==false){
-                return "outline-danger"
-            }
-            return "light"
-        },
-
-        ownVariant(score){
-            if(score==true){
-                return "success"
-            } else if(score==false){
-                return "danger"
-            }
-            return "light"
-        }
     }
 }
 </script>
