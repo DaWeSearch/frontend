@@ -8,7 +8,7 @@
         </b-nav>
 
         
-        <b-card v-for="review in reviews" :key="getReviewId(review)"
+        <b-card v-for="(review,index) in reviews" :key="getReviewId(review)"
         class="m-5"
         :header="review.name"
         header-tag="header" 
@@ -17,16 +17,15 @@
             <p>{{review.owner}}</p>
             <p>{{review.description}}</p>
             <p>{{review.result_collection}}</p>
-            <p>Teilnehmer erstellungsdatum und link zu den searches und dem scoring bereich</p>
 
 
             <b-button @click="search(review)">Search and select publications</b-button>
             <b-button @click="score(review)">Score selected publications</b-button>
             
-            <template v-slot:footer="review">
+            <template v-slot:footer>
                 <b-form-input type="text"></b-form-input>
-                <b-button @click="addUser(review)" variant="primary">Add user</b-button>
-                <b-button @click="deleteReview(review)" variant="primary">Delete review</b-button>
+                <b-button @click="addUserToReview(review)" variant="primary">Add user</b-button>
+                <b-button @click="deleteReview(review,index)" variant="primary">Delete review</b-button>
             </template>
         </b-card>
 
@@ -93,17 +92,19 @@ export default {
             .catch(error => {console.log(error);}); 
         },
 
-        getReviewId(review){
-            return review["_id"]["$oid"]
+        getReviewId(reviewToIdentify){
+            return reviewToIdentify["_id"]["$oid"]
         },
 
-        search(review){
-            SessionStore.data.reviewId = this.getReviewId(review)
+        search(reviewToSearchIn){
+            SessionStore.data.reviewId = this.getReviewId(reviewToSearchIn)
+            console.log(`search in review ${SessionStore.data.reviewId}`)
             this.$router.push("/search") // später reviews/reviewname/search waere cool
         },
 
-        score(review){
-            SessionStore.data.reviewId = this.getReviewId(review)
+        score(reviewToScoreIn){
+            SessionStore.data.reviewId = this.getReviewId(reviewToScoreIn)
+            console.log(`score in review ${SessionStore.data.reviewId}`)
             this.$router.push("/score") // später reviews/reviewname/score waere cool
         },
 
@@ -116,8 +117,11 @@ export default {
             .catch(error => {console.log(error);});
         },
 
-        deleteReview(review) {
-            this.$http.delete(`/review/${review.getReviewId}`)
+        deleteReview(reviewToDelete,index) {
+            console.log(reviewToDelete)
+            console.log(`delete review ${index} id ${this.getReviewId(reviewToDelete)}`);
+            this.reviews.splice(index,1)
+            this.$http.delete(`/review/${this.getReviewId(reviewToDelete)}`)
             .then(data => console.log(data))
             .catch(error => {console.log(error);});
         },
