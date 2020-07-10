@@ -2,80 +2,103 @@
     <div class="search">
         <b-nav tabs >
             <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
-            <b-nav-item active><router-link to="/search">Search</router-link></b-nav-item>
+            <b-nav-item active disabled><router-link to="/search">Search</router-link></b-nav-item>
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
-    
+            <b-button squared class="ml-auto" variant="">Log out</b-button>
         </b-nav>
 
+        <b-container fluid>
+           
+            <b-row>
+                <b-col class="ml-5" cols="3">
+                    <b-input-group class="my-5">
+                        <b-form-input v-model="newSearchGroup" @keypress.enter="addSearchGroup()" placeholder="First term of new search category to include" ></b-form-input>
+                        <b-input-group-append>
+                            <b-button variant="info" @click="addSearchGroup()"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                        </b-input-group-append>
+                    </b-input-group>
+                </b-col>
+            </b-row>
+
+            <b-row>
+                <b-col cols="2" class="ml-5 mb-3">
+                    <b-card
+                    header="Exclude category"
+                    header-tag="header" 
+                    footer-tag="footer"
+                    >
+                        <p v-for="(term,index) in exclude_terms" :key="term" class="mb-2">
+                            {{term}}
+                            <b-icon-dash-circle @click="removeTerm(exclude_terms,index)" variant="danger"></b-icon-dash-circle>
+                        </p>
+
+                        <template v-slot:footer>
+                            <b-input-group>
+                                <b-form-input v-model="newField" @keypress.enter="addTerm(exclude_terms)" placeholder="Term to exclude"></b-form-input>
+                                <b-input-group-append>
+                                    <b-button variant="outline-danger" @click="addTerm(exclude_terms)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                </b-input-group-append>
+                            </b-input-group>
+                        </template>
+                    </b-card>
+                </b-col>
+
+                <b-col v-for="(searchGroup,index) in search_groups" :key="searchGroup.search_terms[0]" cols="2" class="ml-5 mb-3">
+                    <b-card
+                    header-tag="header" 
+                    footer-tag="footer"
+                    >
+                        <template v-slot:header>
+                            Include category
+                            <b-icon-dash-circle v-if="search_groups.length>1" @click="removeSearchGroup(index)" variant="danger"></b-icon-dash-circle>
+                        </template>
+
+                        <p v-for="(term,index) in searchGroup.search_terms" :key="term" class="mb-2">
+                            {{term}}
+                            <b-icon-dash-circle @click="removeTerm(searchGroup.search_terms,index)" variant="danger"></b-icon-dash-circle>
+                        </p>
+
+                        <template v-slot:footer>
+                            <b-input-group>
+                                <b-form-input v-model="newField" @keypress.enter="addTerm(searchGroup.search_terms)" placeholder="Add term to category"></b-form-input>
+                                <b-input-group-append>
+                                    <b-button variant="info" @click="addTerm(searchGroup.search_terms)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                </b-input-group-append>
+                            </b-input-group>
+                        </template>
+                    </b-card>
+                </b-col>
+            </b-row>
+
+            <b-row class="my-5 ml-5">
+                <b-col cols="2">
+                    Search in
+                    <b-form-select v-model="selectedSearchFields" :options="searchFieldOptions"></b-form-select>
+                </b-col>
+                
+                <b-col cols="1">
+                    Page
+                    <b-form-input v-model="displayedPage" placeholder="Page"></b-form-input>
+                </b-col>
+
+                <b-col cols="1">
+                    <b-button @click="onSubmitSearch" variant="primary">Search</b-button>
+                </b-col>
+
+                <b-col cols="8"></b-col>
+            </b-row>
+        </b-container>
         
-        <b-form @submit="onSubmitSearch">
-            <b-card 
-            class="mx-auto"
-            header-tag="header" 
-            footer-tag="footer"
-            >
-                <template v-slot:header>
-                    <p>Aspecs</p>
-                </template>
+        <b-container fluid v-if="tableItems.length>0">
+            <b-button class="my-3" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
 
-                <b-row>
-                    <b-col cols="2">
-                        <b-card 
-                        class="mx-auto"
-                        header="Exclude category"
-                        header-tag="header" 
-                        footer-tag="footer"
-                        >
-                            <p v-for="(term,index) in exclude_terms" :key="term" class="mb-2">
-                                {{term}}
-                                <b-icon-dash-circle @click="removeTerm(exclude_terms,index)" variant="danger"></b-icon-dash-circle>
-                            </p>
+            <p v-for="wrapperResponse in wrapperResponses" :key="wrapperResponse.records[0].publisher">
+                {{ wrapperResponse.records[0].publisher }}: {{wrapperResponse.result.total}}
+            </p>
 
-                            <template v-slot:footer>
-                                <b-form-input v-model="newField" placeholder="Term to exclude from search"></b-form-input>
-                                <b-button @click="addTerm(exclude_terms)">Add term</b-button>
-                            </template>
-                        </b-card>
-                    </b-col>
+        </b-container>
 
-                    <b-col v-for="(searchGroup,index) in search_groups" :key="searchGroup.search_terms[0]" cols="2">
-                        <b-card 
-                        class="mx-auto"
-                        header-tag="header" 
-                        footer-tag="footer"
-                        >
-                            <template v-slot:header>
-                                Include category
-                                <b-icon-dash-circle v-if="search_groups.length>1" @click="removeSearchGroup(index)" variant="danger"></b-icon-dash-circle>
-                            </template>
-
-                            <p v-for="(term,index) in searchGroup.search_terms" :key="term" class="mb-2">
-                                {{term}}
-                                <b-icon-dash-circle @click="removeTerm(searchGroup.search_terms,index)" variant="danger"></b-icon-dash-circle>
-                            </p>
-
-                            <template v-slot:footer>
-                                <b-form-input v-model="newField" placeholder="Term to add to category"></b-form-input>
-                                <b-button @click="addTerm(searchGroup.search_terms)">Add term</b-button>
-                            </template>
-                        </b-card>
-                    </b-col>
-                </b-row>
-
-                <template v-slot:footer>
-                    <b-form-input size="sm" v-model="newSearchGroup" placeholder="First element of new search category to include"></b-form-input>
-                    <b-button @click="addSearchGroup">Add search category</b-button>
-                </template>
-            </b-card>
-
-            <b-button type="submit" variant="primary">Submit</b-button>
-            
-            
-        </b-form>
-        
-        <b-button variant="primary" @click="persist">Persist these {{ pageLength*2 }} out of {{ totalNum }} results</b-button>
-        
-        <b-table v-if="items.length>0" fixed hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
+        <b-table v-if="tableItems.length>0" fixed hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
             <template v-slot:cell(uri)="row">
                 <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">{{row.item.uri}}</b-link>
@@ -104,17 +127,27 @@ export default {
     name: 'Search',
     data: () => {
         return {
+            newSearchGroup:"",
             newField: "",
             exclude_terms: [],
             search_groups: [{"search_terms":[],"match":"OR"}],
-            fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri'],
-            items: [],
-            text: "",
+            selectedSearchFields: ["all"],
+            searchFieldOptions: [{ value: ["all"], text: 'all allowed fields' },  //option groups auch interessant siehe form-select docs
+                                { value: ["keywords"], text: 'keywords only' },
+                                { value: ["title"], text: 'title only' },
+                                { value: ["abstract"], text: 'abstract only' },
+                                { value: ["keywords","title"], text: 'keywords and title' },
+                                { value: ["keywords","abstract"], text: 'keywords and abstract' },
+                                { value: ["title","abstract"], text: 'title and abstract' },
+                                { value: ["keywords","title","abstract"], text: 'keywords,title and abstract' }
+                                ],
             pagecount: 0,
             displayedPage: 1,
             pageLength: 50,
-            newSearchGroup:"",
-            totalNum: 0// num of persisted entries on db
+            totalNum: 0,// num of persisted entries on db
+            wrapperResponses: null,
+            fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri'],
+            tableItems: []
         };
     },
 
@@ -147,35 +180,47 @@ export default {
         removeTerm(group,index){
             group.splice(index,1)
         },
-
+        
         buildQuery(){
             let query = {
                 "search_groups": [{"search_terms":this.exclude_terms,"match":"NOT"},
                                     ...this.search_groups
                                 ].filter( searchGroup => searchGroup.search_terms.length>0),
                 "match": "AND",
-                "fields": ["all"/*, "abstract", "keywords", "title"*/],
+                "fields": this.selectedSearchFields,
             };
             
             return query
         },
 
+        processWrapperResponses(){
+            console.log(this.wrapperResponses)
+            this.tableItems = []
+            this.wrapperResponses.forEach(d=>{
+                this.totalNum += parseInt(d.result.total)
+                console.log(`d.result.total ${d.result.total}`)
+                if(d.records.length > 0){
+                    this.tableItems.push(...d.records) 
+                }
+            })
+        },
+
         onSubmitSearch(evt){
             evt.preventDefault();
             
-            this.$http.post(`/query_query?${this.displayedPage}?${this.pageLength}`,this.buildQuery())
+            this.$http.post(`/query?page=${this.displayedPage}`,{"search":this.buildQuery()}) /*?page_length=${this.pageLength}*/
             .then(data => {
-                this.items = data.data.results
+                this.wrapperResponses = data.data
+                this.processWrapperResponses()
             }).catch(error => console.log(error))
-            //console.log(this.buildQuery())
-        },
-
-        persist(){
-
         },
 
         onRowClicked(row) {
             row._showDetails=!row._showDetails;
+        },
+
+        persist(){
+            
         },
     }
 }
