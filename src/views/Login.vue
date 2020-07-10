@@ -48,9 +48,9 @@ export default {
             evt.preventDefault()
             this.$http.post('/login',{"username":this.username,"password":this.password})
             .then(data => {console.log("hier ist ein signupresponse");
-                            SessionStore.data.authKey=data.data;
+                            SessionStore.data.authenticationToken=data.data;
                             SessionStore.data.username=this.username;
-                            console.log(SessionStore.data.authKey);
+                            console.log(SessionStore.data.authenticationToken);
                             this.$router.push("/")
                             }
             )
