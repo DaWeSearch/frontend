@@ -1,38 +1,58 @@
 <template>
     <div id="reviews">
         <b-nav tabs >
-            <b-nav-item active><router-link to="/">Reviews</router-link></b-nav-item>
-            <b-nav-item><router-link to="/search">Search</router-link></b-nav-item>
-            <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
+            <b-nav-item active disabled>Reviews</b-nav-item>
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
+            <b-button squared class="ml-auto" variant="">Log out</b-button>
         </b-nav>
 
-        
-        <b-card v-for="(review,index) in reviews" :key="getReviewId(review)"
-        class="m-5"
-        :header="review.name"
-        header-tag="header" 
-        footer-tag="footer"
-        >   
-            <p>{{review.owner}}</p>
-            <p>{{review.description}}</p>
-            <p>{{review.result_collection}}</p>
+        <b-container>
+            <b-card class="mt-3 mb-5"
+            header="Create review">
+                <b-row>
+                    <b-col>
+                        <b-form-input type="text" v-model="newReviewName" placeholder="Name of new Review"></b-form-input>
+                    </b-col>
+                    <b-col>
+                        <b-button type="button" variant="primary" @click="createReview()">Create</b-button>
+                    </b-col>
+                </b-row>
+                <b-form-textarea class="my-3" type="text" v-model="newReviewDescription" placeholder="Description of new Review"></b-form-textarea>
+            </b-card>
 
+            <b-row>
+                <b-col class="mb-3" v-for="(review,index) in reviews" :key="getReviewId(review)" cols="6">
+                    <b-card 
+                    :title="review.name"
+                    footer-tag="footer"
+                    >   
+                        <p>Created by {{review.owner}}</p>
+                        <p>{{review.description}}</p>
+                        <!--<p>{{review.result_collection}}</p>-->
 
-            <b-button @click="search(review)">Search and select publications</b-button>
-            <b-button @click="score(review)">Score selected publications</b-button>
-            
-            <template v-slot:footer>
-                <b-form-input type="text"></b-form-input>
-                <b-button @click="addUserToReview(review)" variant="primary">Add user</b-button>
-                <b-button @click="deleteReview(review,index)" variant="primary">Delete review</b-button>
-            </template>
-        </b-card>
+                        
+                        <template v-slot:footer>
+                            <b-row>
+                                <b-col>
+                                    <b-input-group class="m-1">
+                                        <b-form-input v-model="review.newUser" placeholder="Username to add"></b-form-input>
+                                        <b-input-group-append>
+                                            <b-button @click="addUserToReview(review)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                        </b-input-group-append>
+                                    </b-input-group>
+                                    <b-button class="m-1" @click="deleteReview(review,index)" >Delete review</b-button>
+                                </b-col>
+                                <b-col>
+                                    <b-button class="m-1" variant="info" @click="search(review)">Search for publications</b-button>
+                                    <b-button class="m-1" variant="info" @click="score(review)">Score selected publications</b-button>
+                                </b-col>
+                            </b-row>
+                        </template>
+                    </b-card>
 
-        
-        <b-form-input type="text" v-model="newReviewName"></b-form-input>
-        <b-form-input type="text" v-model="newReviewDescription"></b-form-input>
-        <b-button type="button" variant="primary" @click="createReview()">Create review</b-button>
+                </b-col>
+            </b-row>
+        </b-container>
     </div>
 </template>
 
@@ -109,16 +129,20 @@ export default {
         },
 
         createReview() {
-            this.$http.post("/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
-            .then(data => {console.log("add review");
-                            console.log(data.data);
-                            this.reviews.push(data.data)
-                            })
-            .catch(error => {console.log(error);});
+            if(this.newReviewName.length > 0){
+                this.$http.post("/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
+                .then(data => {console.log("add review");
+                                console.log(data.data);
+                                this.reviews.push(data.data)
+                                })
+                .catch(error => {console.log(error);});
+            }
+            else{
+                console.log("cant create review without reviewname")
+            }
         },
 
         deleteReview(reviewToDelete,index) {
-            console.log(reviewToDelete)
             console.log(`delete review ${index} id ${this.getReviewId(reviewToDelete)}`);
             this.reviews.splice(index,1)
             this.$http.delete(`/review/${this.getReviewId(reviewToDelete)}`)
@@ -126,8 +150,17 @@ export default {
             .catch(error => {console.log(error);});
         },
 
-        addUserToReview(review) {
-            console.log(review)
+        addUserToReview(reviewToAddUsernameTo) {
+            if(reviewToAddUsernameTo.newUser.length > 0){
+                console.log(`add user ${null} to review id ${this.getReviewId(reviewToAddUsernameTo)}`);
+                this.$http.post(`review/${this.getReviewId(reviewToAddUsernameTo)}/collaborator?username=${reviewToAddUsernameTo.newUser}`)
+                .then(data => {console.log("added user");
+                               console.log(data.data);})
+                .catch(error => {console.log(error);});
+            }
+            else{
+                console.log("cant add user without username")
+            }
         },
     },
 
