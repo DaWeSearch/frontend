@@ -112,7 +112,6 @@ export default {
 
             this.$http.get(`/users/${SessionStore.data.username}/reviews`)
             .then(data => {console.log("get reviews");
-                            console.log(data.data.reviews);
                             this.reviews = data.data.reviews[0];//reviews sind in ansonsten lehrer liste irgendwie
                             this.reviewsLoading = false
                             })
@@ -139,7 +138,6 @@ export default {
             if(this.newReviewName.length > 0){
                 this.$http.post("/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
                 .then(data => {console.log("add review");
-                                console.log(data.data);
                                 this.reviews.push(data.data)
                                 })
                 .catch(error => {console.log(error);});
@@ -153,7 +151,7 @@ export default {
             console.log(`delete review ${index} id ${this.getReviewId(reviewToDelete)}`);
             this.reviews.splice(index,1)
             this.$http.delete(`/review/${this.getReviewId(reviewToDelete)}`)
-            .then(data => console.log(data))
+            .then(console.log("deleted"))
             .catch(error => {console.log(error);});
         },
 
@@ -161,20 +159,13 @@ export default {
             if(reviewToAddUsernameTo.newUser.length > 0){
                 console.log(`add user ${null} to review id ${this.getReviewId(reviewToAddUsernameTo)}`);
                 this.$http.post(`review/${this.getReviewId(reviewToAddUsernameTo)}/collaborator?username=${reviewToAddUsernameTo.newUser}`)
-                .then(data => {console.log("added user");
-                               console.log(data.data);})
+                .then(console.log("added user"))
                 .catch(error => {console.log(error);});
             }
             else{
                 console.log("cant add user without username")
             }
         },
-    },
-
-    computed: {
-        rows() {
-            return this.items.length
-        }
     }
 }
 </script>
