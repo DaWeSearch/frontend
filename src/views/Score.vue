@@ -7,8 +7,6 @@
             <b-button squared class="ml-auto" variant="">Log out</b-button>
     
         </b-nav>
-
-        <b-spinner v-if="persistedLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
         
         <b-table hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
@@ -60,6 +58,8 @@
             </template>
 
         </b-table>
+
+        <b-spinner v-if="persistedLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
     </div>
 </template>
 
@@ -94,15 +94,15 @@ export default {
             this.$router.push("/login")
         }
         else{
-            //getPersisted();
+            this.getPersisted();
         }
     },
 
     methods: {
         getPersisted(){
-            console.log("get persisted in score")
             this.persistedLoading = true
-            this.$http.get('/results?review_id=5ecd4bc497446f15f0a85f0d')
+            console.log("get persisted in score")
+            this.$http.get(`/results/${SessionStore.data.reviewId}?page=1`)
             .then(data => {
                 this.items = data.data.results
                 this.persistedLoading = false
@@ -111,7 +111,6 @@ export default {
 
         onRowClicked(row) {
             row._showDetails=!row._showDetails;
-            //console.log(row._showDetails)
         },
 
         upClicked(item){

@@ -160,7 +160,7 @@ export default {
                 console.log(`add user ${null} to review id ${this.getReviewId(reviewToAddUsernameTo)}`);
                 this.$http.post(`review/${this.getReviewId(reviewToAddUsernameTo)}/collaborator?username=${reviewToAddUsernameTo.newUser}`)
                 .then(console.log("added user"))
-                .catch(error => {console.log(error);});
+                .catch(error => {console.log(error)});
             }
             else{
                 console.log("cant add user without username")
