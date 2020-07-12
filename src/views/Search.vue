@@ -9,9 +9,9 @@
 
         <b-container fluid>
            
-            <b-row>
-                <b-col class="ml-5" cols="3">
-                    <b-input-group class="my-5">
+            <b-row class="ml-5 my-5">
+                <b-col  cols="3">
+                    <b-input-group>
                         <b-form-input v-model="newSearchGroup" @keypress.enter="addSearchGroup()" placeholder="First term of new search category to include" ></b-form-input>
                         <b-input-group-append>
                             <b-button variant="info" @click="addSearchGroup()"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
@@ -70,7 +70,7 @@
                 </b-col>
             </b-row>
 
-            <b-row class="my-5 ml-5">
+            <b-row class="ml-5 my-5">
                 <b-col cols="2">
                     Search in
                     <b-form-select v-model="selectedSearchFields" :options="searchFieldOptions"></b-form-select>
@@ -88,6 +88,8 @@
                 <b-col cols="8"></b-col>
             </b-row>
         </b-container>
+
+        <b-spinner v-if="resultsLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
         
         <b-container fluid v-if="tableItems.length>0">
             <b-button class="my-3" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
@@ -98,7 +100,7 @@
 
         </b-container>
 
-        <b-table v-if="tableItems.length>0" fixed hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
+        <b-table v-if="tableItems.length>0" hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
             <template v-slot:cell(uri)="row">
                 <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">{{row.item.uri}}</b-link>
@@ -127,6 +129,7 @@ export default {
     name: 'Search',
     data: () => {
         return {
+            resultsLoading: false,
             newSearchGroup:"",
             newField: "",
             exclude_terms: [],
@@ -208,11 +211,14 @@ export default {
         },
 
         onSubmitSearch(){
+            this.tableItems = []
+            this.resultsLoading = true
             this.queryUsedForSearch = this.buildQuery()
             this.$http.post(`/query?page=${this.displayedPage}&page_length=${this.pageLength}`,{"search":this.queryUsedForSearch})
             .then(data => {
                 this.wrapperResponses = data.data
                 this.processWrapperResponses()
+            this.resultsLoading = false
             }).catch(error => console.log(error))
         },
 

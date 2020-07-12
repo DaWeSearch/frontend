@@ -20,6 +20,8 @@
                 <b-form-textarea class="my-3" type="text" v-model="newReviewDescription" placeholder="Description of new Review"></b-form-textarea>
             </b-card>
 
+            <b-spinner v-if="reviewsLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
+
             <b-row>
                 <b-col class="mb-3" v-for="(review,index) in reviews" :key="getReviewId(review)" cols="6">
                     <b-card 
@@ -64,9 +66,10 @@ export default {
     name: "Reviews",
     data: () => {
         return {
+            reviewsLoading: true,
             newReviewName: "",
             newReviewDescription: "",
-            reviews: [  /*{"name": "New Review 1", // static for development
+            reviews: [  /*{"name": "New Review 1", // static for development     REVIEWS KÖNNTE MAN AUCH IM SESSION STORE SPEICHERN DAMIT NICHT JEDES MAL GEPULLT WERDEN MUSS
                         "owner": "testu",
                         "result_collection": "results-None",
                         "description": "Add review test 1",
@@ -104,10 +107,14 @@ export default {
 
     methods: {
         getReviews(){
+            this.reviews = []
+            this.reviewsLoading = true
+
             this.$http.get(`/users/${SessionStore.data.username}/reviews`)
             .then(data => {console.log("get reviews");
                             console.log(data.data.reviews);
                             this.reviews = data.data.reviews[0];//reviews sind in ansonsten lehrer liste irgendwie
+                            this.reviewsLoading = false
                             })
             .catch(error => {console.log(error);}); 
         },

@@ -7,8 +7,10 @@
             <b-button squared class="ml-auto" variant="">Log out</b-button>
     
         </b-nav>
+
+        <b-spinner v-if="persistedLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
         
-        <b-table fixed hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
+        <b-table hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
             <template v-slot:cell(uri)="row">
                 <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">{{row.item.uri}}</b-link>
@@ -68,6 +70,7 @@ export default {
     name: 'Score',
     data: () => {
         return {
+        persistedLoading: true,
         fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri','score'],
         items: [{'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
               {'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
@@ -96,9 +99,11 @@ export default {
 
     methods: {
         getPersisted(){
+            this.persistedLoading = true
             this.$http.get('/results?review_id=5ecd4bc497446f15f0a85f0d')
             .then(data => {
                 this.items = data.data.results
+                this.persistedLoading = false
             }).catch(error => console.log(error))
         },
 
