@@ -51,7 +51,7 @@ export default {
             evt.preventDefault()
             if(this.passwordsEqual()){
                 this.$http.post('/users',this.form)
-                .then(data => {console.log("Signed up");
+                .then(() => {console.log("Signed up");
                                 this.$router.push("/login")})
                 .catch(error => console.log(error));
             
