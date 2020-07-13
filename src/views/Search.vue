@@ -158,7 +158,12 @@ export default {
 
     beforeMount() {
         if(SessionStore.data.authenticationToken==null){
+            console.log("need to log in before searching")
             this.$router.push("/login")
+        }
+        else if(SessionStore.data.reviewId==null){
+            console.log("need to select rewview before searching")
+            this.$router.push("/")
         }
     },
 
