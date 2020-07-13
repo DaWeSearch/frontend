@@ -19,19 +19,13 @@
             </template>
 
             <template v-slot:cell(score)="row">
-                <!--<b-badge v-for="score in row.item.scores" variant="ownVariant(score)"></b-badge>-->
-                <b-badge variant="success">A</b-badge>
-                <b-badge variant="success">B</b-badge>
-                <b-badge variant="danger">C</b-badge>
-                <b-badge variant="light">D</b-badge>
-                <b-badge :variant="ownVariant(row.item.score)">E</b-badge>
-                <b-badge variant="success">F</b-badge>
+                {{row.item.score}}/5
             </template>
 
             <template v-slot:row-details="row">
                 
                 <b-row>
-                    <b-col cols="11">
+                    <b-col cols="10">
                         <b-form-textarea
                         id="textarea"
                         v-model="row.item.comment"
@@ -40,21 +34,18 @@
                         max-rows="6"
                         ></b-form-textarea>
                     </b-col>
-                    <b-col cols="1">
-                        <b-button-group>
-                        <b-button :variant="upVariant(row.item.score)" @click="upClicked(row.item)"><b-icon-hand-thumbs-up></b-icon-hand-thumbs-up></b-button>  <!-- wenn ausgewählt switch zu variant="outline-success"-->
-                        <b-button :variant="downVariant(row.item.score)" @click="downClicked(row.item)"><b-icon-hand-thumbs-down></b-icon-hand-thumbs-down></b-button>  <!-- wenn ausgewählt switch zu variant="outline-danger"-->
-                        </b-button-group>
+                    <b-col cols="2">
+                        <b-form-rating v-model="row.item.score"></b-form-rating>
                         <b-button pill>Save</b-button>
                     </b-col>
                 </b-row>
                 
-                <!--             ABSTRACT NICHT NOETIG WEIL MAN SICH ZEIT NIMMT  --- bei nutzung v-slot:row-details="row" in template tage packen
+                <!--             ABSTRACT NICHT NOETIG WEIL MAN SICH ZEIT NIMMT  --- bei nutzung v-slot:row-details="row" in template tage packen-->
                 <b-row>
                 <b-col cols="1"></b-col>
                 <b-col cols="10"><p>{{row.item.abstract}}</p></b-col>
                 <b-col cols="1"></b-col>
-                </b-row>-->
+                </b-row>
             </template>
 
         </b-table>
@@ -83,7 +74,7 @@ export default {
         pageLength: 100,
         scoreUp: null,
         perso: null,
-        //totalNum: 0 num of persisted entries on db
+        totalNum:0 //0 num of persisted entries on db
         //user_id,reviewinternal_user_id,review_id
         };
     },
@@ -109,57 +100,16 @@ export default {
             console.log("get persisted in score")
             this.$http.get(`/results/${SessionStore.data.reviewId}?page=1&page_length=50`)
             .then(data => {
+                console.log(data)
                 this.items = data.data.results
+                this.totalNum = data.data.total_results
                 this.persistedLoading = false
             }).catch(error => console.log(error))
         },
 
         onRowClicked(row) {
             row._showDetails=!row._showDetails;
-        },
-
-        upClicked(item){
-            if(item.score==true){
-                item.score=null
-            } else {
-                item.score=true
-            }
-
-        },
-
-        downClicked(item){
-            if(item.score==false){
-                item.score=null
-            } else {
-                item.score=false
-            }
-
-        },
-
-        upVariant(score){
-            if(score==true){
-                return "outline-success"
-            }
-            return "light"
-        },
-
-        downVariant(score){
-            if(score==false){
-                return "outline-danger"
-            }
-            return "light"
-        },
-
-        ownVariant(score){
-            if(score==true){
-                return "success"
-            } else if(score==false){
-                return "danger"
-            }
-            return "light"
         }
-    },
-    components:{
     }
 }
 </script>
