@@ -49,6 +49,7 @@ export default {
             this.$http.post('/login',{"username":this.username,"password":this.password})
             .then(data => {console.log("hier ist ein login");
                             SessionStore.data.authenticationToken=data.data;
+                            this.$http.defaults.headers.common["authorizationToken"]=SessionStore.data.authenticationToken;
                             SessionStore.data.username=this.username;
                             console.log(SessionStore.data.authenticationToken);
                             this.$router.push("/")
