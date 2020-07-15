@@ -8,58 +8,70 @@
     
         </b-nav>
         
-        <b-table hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
-        
-            <template v-slot:cell(uri)="row">
-                <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">{{row.item.uri}}</b-link>
-            </template>
+        <b-table hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
 
+            <template v-slot:cell(doi)="row">
+                {{ row.item["_id"] }}
+            </template>
+        
             <template v-slot:cell(authors)="row">
                 {{ row.item.authors.join(" - ") }}
             </template>
+        
+            <template v-slot:cell(uri)="row">
+                <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">Click</b-link>
+            </template>
 
             <template v-slot:cell(score)="row">
-                <!--<b-badge v-for="score in row.item.scores" variant="ownVariant(score)"></b-badge>-->
-                <b-badge variant="success">A</b-badge>
-                <b-badge variant="success">B</b-badge>
-                <b-badge variant="danger">C</b-badge>
-                <b-badge variant="light">D</b-badge>
-                <b-badge :variant="ownVariant(row.item.score)">E</b-badge>
-                <b-badge variant="success">F</b-badge>
+                {{row.item.averageScore}}/5 by {{row.item.numberOfScores}}
             </template>
 
             <template v-slot:row-details="row">
-                
-                <b-row>
-                    <b-col cols="11">
-                        <b-form-textarea
-                        id="textarea"
-                        v-model="row.item.comment"
-                        placeholder="Comments section is shared with Co-Reviewers"
-                        rows="2"
-                        max-rows="6"
-                        ></b-form-textarea>
-                    </b-col>
-                    <b-col cols="1">
-                        <b-button-group>
-                        <b-button :variant="upVariant(row.item.score)" @click="upClicked(row.item)"><b-icon-hand-thumbs-up></b-icon-hand-thumbs-up></b-button>  <!-- wenn ausgewählt switch zu variant="outline-success"-->
-                        <b-button :variant="downVariant(row.item.score)" @click="downClicked(row.item)"><b-icon-hand-thumbs-down></b-icon-hand-thumbs-down></b-button>  <!-- wenn ausgewählt switch zu variant="outline-danger"-->
-                        </b-button-group>
-                        <b-button pill>Save</b-button>
-                    </b-col>
-                </b-row>
-                
-                <!--             ABSTRACT NICHT NOETIG WEIL MAN SICH ZEIT NIMMT  --- bei nutzung v-slot:row-details="row" in template tage packen
-                <b-row>
-                <b-col cols="1"></b-col>
-                <b-col cols="10"><p>{{row.item.abstract}}</p></b-col>
-                <b-col cols="1"></b-col>
-                </b-row>-->
+                <b-container>
+                    <b-row>
+                        <b-col cols="10">
+                            <b-form-textarea
+                            id="textarea"
+                            v-model="row.item.ownComment"
+                            placeholder="Write your comment here"
+                            rows="1"
+                            max-rows="6"
+                            ></b-form-textarea>
+                        </b-col>
+                        <b-col cols="2">
+                            <b-form-rating v-model="row.item.ownScore"></b-form-rating>
+                            <b-button pill @click="updateScore(row.item)">Save</b-button>
+                        </b-col>
+                    </b-row>
+
+                    <b-row class="my-3">
+                        <b-col cols="1"></b-col>
+                        <b-col cols="10"><p>{{row.item.abstract}}</p></b-col>
+                        <b-col cols="1"></b-col>
+                    </b-row>
+
+                    <b-row class="my-3" v-for="score in row.item.scores" :key="score.user">
+                        <b-col cols="2">
+                            {{score.user}}
+                            <b-form-rating v-model="score.score" readonly></b-form-rating>
+                        </b-col>
+                        <b-col cols="10">
+                            <b-form-textarea
+                            plaintext :value="score.comment"
+                            rows="1"
+                            max-rows="6"
+                            ></b-form-textarea>
+                        </b-col>
+                    </b-row>
+
+                </b-container>
             </template>
 
         </b-table>
-
+        
         <b-spinner v-if="persistedLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
+
+        <p v-if="!persistedLoading && tableItems.length==0" class="mt-5 mx-auto">NO PUBLICATIONS PERSISTED YET</p>
     </div>
 </template>
 
@@ -70,28 +82,24 @@ export default {
     name: 'Score',
     data: () => {
         return {
-        persistedLoading: true,
-        fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri','score'],
-        items: [/*{'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-              {'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-              {'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-              {'publicationDate':"demodummydata", 'title':"demodummydata",'authors':["demodummydata","demodummydata"],'publisher':"demodummydata",'uri':"demodummydata",'contentType':"demodummydata", 'genre':"demodummydata",'score':null,"comment":"dummycomment","abstract":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."}
-              */],
-        text: "",
-        pagecount: 0,
-        displayedPage: 1,
-        pageLength: 100,
-        scoreUp: null,
-        perso: null,
-        //totalNum: 0 num of persisted entries on db
-        //user_id,reviewinternal_user_id,review_id
+            persistedLoading: true,
+            fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri','score'],
+            tableItems: [],
+            pagecount: 0,
+            displayedPage: 1,
+            pageLength: 300,
         };
     },
 
 
     beforeMount() {
         if(SessionStore.data.authenticationToken==null){
+            console.log("need to log in before scoring")
             this.$router.push("/login")
+        }
+        else if(SessionStore.data.reviewId==null){
+            console.log("need to select rewview before scoring")
+            this.$router.push("/")
         }
         else{
             this.getPersisted();
@@ -102,59 +110,72 @@ export default {
         getPersisted(){
             this.persistedLoading = true
             console.log("get persisted in score")
-            this.$http.get(`/results/${SessionStore.data.reviewId}?page=1`)
+            this.$http.get(`/results/${SessionStore.data.reviewId}?page=1&page_length=50`)
             .then(data => {
-                this.items = data.data.results
+                console.log(data)
+
+                this.totalNum = data.data.total_results
+
+                let rawItems = data.data.results
+                rawItems.forEach(publication => {
+                    let oldScoreFound = false
+                    publication.averageScore = 0 
+                    publication.numberOfScores = 0 
+
+                    if(publication.scores != undefined){
+                        publication.numberOfScores = publication.scores.length
+                        let sumOfScores = 0
+
+                        let ownIndex = -1
+                        for(let i=0; i<publication.scores.length; i++){
+                            sumOfScores += publication.scores[i].score
+                            if(publication.scores[i].user==SessionStore.data.username){
+                                ownIndex = i
+                                oldScoreFound = true
+                            }
+                        }
+
+                        if(ownIndex!=-1){
+                            publication.ownScore = publication.scores[ownIndex].score
+                            publication.ownComment = publication.scores[ownIndex].comment
+                            publication.scores.splice(ownIndex,1)
+                        }
+
+
+                        publication.averageScore = sumOfScores / publication.numberOfScores
+                    }
+
+                    else{
+                        publication.scores = []
+                    }
+                    
+                    if(!oldScoreFound){
+                        publication.ownScore = 0
+                        publication.ownComment = ""
+                    }
+                });
+
+                this.tableItems = rawItems
                 this.persistedLoading = false
             }).catch(error => console.log(error))
         },
 
+        updateScore(publication){
+            this.$http.post(`/score/${SessionStore.data.reviewId}?doi=${publication["_id"]}`,{"username":SessionStore.data.username,"score":publication.ownScore,"comment":publication.ownComment})
+            .then(() => {console.log(`Set in doi ${publication["_id"]} score for ${SessionStore.data.username} to ${publication.ownScore} and comment to ${publication.ownComment}`);
+                    publication.numberOfScores = publication.scores.length + 1
+                    let sumOfScores = publication.ownScore
+                    publication.scores.forEach(element => {
+                        sumOfScores +=element.score                      
+                    });
+                    publication.averageScore = sumOfScores/publication.numberOfScores
+                })
+            .catch(error => console.log(error))
+        },
+
         onRowClicked(row) {
             row._showDetails=!row._showDetails;
-        },
-
-        upClicked(item){
-            if(item.score==true){
-                item.score=null
-            } else {
-                item.score=true
-            }
-
-        },
-
-        downClicked(item){
-            if(item.score==false){
-                item.score=null
-            } else {
-                item.score=false
-            }
-
-        },
-
-        upVariant(score){
-            if(score==true){
-                return "outline-success"
-            }
-            return "light"
-        },
-
-        downVariant(score){
-            if(score==false){
-                return "outline-danger"
-            }
-            return "light"
-        },
-
-        ownVariant(score){
-            if(score==true){
-                return "success"
-            } else if(score==false){
-                return "danger"
-            }
-            return "light"
         }
-    },
-    components:{
     }
 }
 </script>

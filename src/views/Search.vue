@@ -72,13 +72,22 @@
 
             <b-row class="ml-5 my-5">
                 <b-col cols="2">
-                    Search in
+                    Select literature database fields to search in
                     <b-form-select v-model="selectedSearchFields" :options="searchFieldOptions"></b-form-select>
                 </b-col>
                 
-                <b-col cols="1">
-                    Page
-                    <b-form-input v-model="displayedPage" placeholder="Page"></b-form-input>
+                <b-col cols="2">
+                    Result page index
+                    <div class="mx-5 p-3">
+                        <b-form-input size="sm" v-model="displayedPage" placeholder="Page"></b-form-input>
+                    </div>
+                </b-col>
+                
+                <b-col cols="2">
+                    Number of publications
+                    <div class="mx-5 p-3">
+                        <b-form-input size="sm" v-model="pageLength" placeholder="Page"></b-form-input>
+                    </div>
                 </b-col>
 
                 <b-col cols="1">
@@ -90,24 +99,36 @@
         </b-container>
 
         <b-spinner v-if="resultsLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
+
+        <p v-if="!resultsLoading && tableItems.length==0" class="mx-auto my-5">{{!queryUsedForSearch ? "You can use the categories as groups of synonyms" : "NOTHING FOUND"}}</p>
         
         <b-container fluid v-if="tableItems.length>0">
-            <b-button class="my-3" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
+            <p>Total numbers of publications fitting the request in each corresponding literature database</p>
+            <div v-for="wrapperResponse in wrapperResponses" :key="wrapperResponse.total"> <!-- TOTAL ALS KEY SEHR UNSICHER-->
+                <p v-if="wrapperResponse.records.length>0">{{wrapperResponse.records[0].publisher}}: {{wrapperResponse.result.total}}</p>            
+            </div>
+            <b-button class="my-2" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
+            <p>Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored </p>
 
-            <p v-for="wrapperResponse in wrapperResponses" :key="wrapperResponse.records[0].publisher">
-                {{ wrapperResponse.records[0].publisher }}: {{wrapperResponse.result.total}}
-            </p>
 
         </b-container>
 
         <b-table v-if="tableItems.length>0" hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
-        
-            <template v-slot:cell(uri)="row">
-                <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">{{row.item.uri}}</b-link>
+
+            <template v-slot:cell(P)="row">
+                <b-icon-intersect v-if="row.item.persisted"></b-icon-intersect>
+            </template>
+
+            <template v-slot:cell(dismiss)="row">
+                <b-button size="sm" variant="light" @click="dismissItem(row.index)"><b-icon-dash-circle-fill size="sm" variant="danger"></b-icon-dash-circle-fill></b-button>
             </template>
 
             <template v-slot:cell(authors)="row">
                 {{ row.item.authors.join(" - ") }}
+            </template>
+        
+            <template v-slot:cell(uri)="row">
+                <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">Click</b-link>
             </template>
 
             <template v-slot:row-details="row">
@@ -135,7 +156,7 @@ export default {
             exclude_terms: [],
             search_groups: [{"search_terms":[],"match":"OR"}],
             selectedSearchFields: ["all"],
-            searchFieldOptions: [{ value: ["all"], text: 'all allowed fields' },  //option groups auch interessant siehe form-select docs
+            searchFieldOptions: [{ value: ["all"], text: 'all fields' },  //option groups auch interessant siehe form-select docs
                                 { value: ["keywords"], text: 'keywords only' },
                                 { value: ["title"], text: 'title only' },
                                 { value: ["abstract"], text: 'abstract only' },
@@ -150,7 +171,7 @@ export default {
             queryUsedForSearch: null,
             totalNum: 0,// num of persisted entries on db
             wrapperResponses: null,
-            fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri'],
+            fields: ['doi','P','dismiss','publicationDate', 'title','authors','publicationName','publisher','uri'],
             tableItems: []
         };
     },
@@ -158,7 +179,12 @@ export default {
 
     beforeMount() {
         if(SessionStore.data.authenticationToken==null){
+            console.log("need to log in before searching")
             this.$router.push("/login")
+        }
+        else if(SessionStore.data.reviewId==null){
+            console.log("need to select rewview before searching")
+            this.$router.push("/")
         }
     },
 
@@ -214,7 +240,7 @@ export default {
             this.tableItems = []
             this.resultsLoading = true
             this.queryUsedForSearch = this.buildQuery()
-            this.$http.post(`/query?page=${this.displayedPage}&page_length=${this.pageLength}`,{"search":this.queryUsedForSearch})
+            this.$http.post(`/query?page=${this.displayedPage}&page_length=${this.pageLength}&review_id=${SessionStore.data.reviewId}`,{"search":this.queryUsedForSearch})
             .then(data => {
                 this.wrapperResponses = data.data
                 this.processWrapperResponses()
@@ -224,6 +250,11 @@ export default {
 
         onRowClicked(row) {
             row._showDetails=!row._showDetails;
+        },
+
+        dismissItem(index){
+            console.log(index)
+            this.tableItems.splice(index,1)
         },
 
         persist(){
