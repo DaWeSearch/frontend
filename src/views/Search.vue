@@ -108,7 +108,7 @@
                 <p v-if="wrapperResponse.records.length>0">{{wrapperResponse.records[0].publisher}}: {{wrapperResponse.result.total}}</p>            
             </div>
             <b-button class="my-2" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
-            Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored
+            <p>Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored </p>
 
 
         </b-container>

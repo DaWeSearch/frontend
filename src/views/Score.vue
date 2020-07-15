@@ -8,8 +8,12 @@
     
         </b-nav>
         
-        <b-table hover striped small :items="items" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
+        <b-table hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
 
+            <template v-slot:cell(doi)="row">
+                {{ row.item["_id"] }}
+            </template>
+        
             <template v-slot:cell(authors)="row">
                 {{ row.item.authors.join(" - ") }}
             </template>
@@ -19,7 +23,7 @@
             </template>
 
             <template v-slot:cell(score)="row">
-                {{row.item.score}}/5
+                {{row.item.averageScore}}/5 by {{row.item.numberOfScores}}
             </template>
 
             <template v-slot:row-details="row">
@@ -28,15 +32,15 @@
                     <b-col cols="10">
                         <b-form-textarea
                         id="textarea"
-                        v-model="row.item.comment"
-                        placeholder="Comments section is shared with Co-Reviewers"
-                        rows="2"
+                        v-model="row.item.ownComment"
+                        placeholder="Write your comment here"
+                        rows="1"
                         max-rows="6"
                         ></b-form-textarea>
                     </b-col>
                     <b-col cols="2">
-                        <b-form-rating v-model="row.item.score"></b-form-rating>
-                        <b-button pill>Save</b-button>
+                        <b-form-rating v-model="row.item.ownScore"></b-form-rating>
+                        <b-button pill @click="updateScore(row.item)">Save</b-button>
                     </b-col>
                 </b-row>
                 
@@ -52,7 +56,7 @@
         
         <b-spinner v-if="persistedLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
 
-        <p v-if="!persistedLoading && items.length==0" class="mt-5 mx-auto">NO PUBLICATIONS PERSISTED YET</p>
+        <p v-if="!persistedLoading && tableItems.length==0" class="mt-5 mx-auto">NO PUBLICATIONS PERSISTED YET</p>
     </div>
 </template>
 
@@ -63,17 +67,12 @@ export default {
     name: 'Score',
     data: () => {
         return {
-        persistedLoading: true,
-        fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri','score'],
-        items: [],
-        text: "",
-        pagecount: 0,
-        displayedPage: 1,
-        pageLength: 100,
-        scoreUp: null,
-        perso: null,
-        totalNum:0 //0 num of persisted entries on db
-        //user_id,reviewinternal_user_id,review_id
+            persistedLoading: true,
+            fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri','score'],
+            tableItems: [],
+            pagecount: 0,
+            displayedPage: 1,
+            pageLength: 300,
         };
     },
 
@@ -99,10 +98,66 @@ export default {
             this.$http.get(`/results/${SessionStore.data.reviewId}?page=1&page_length=50`)
             .then(data => {
                 console.log(data)
-                this.items = data.data.results
+
                 this.totalNum = data.data.total_results
+
+                let rawItems = data.data.results
+                rawItems.forEach(publication => {
+                    let oldScoreFound = false
+                    publication.averageScore = 0 
+                    publication.numberOfScores = 0 
+
+                    if(publication.scores != undefined){
+                        publication.numberOfScores = publication.scores.length
+                        let sumOfScores = 0
+
+                        let ownIndex = -1
+                        for(let i=0; i<publication.scores.length; i++){
+                            sumOfScores += publication.scores[i].score
+                            console.log(publication.scores[i].comment)
+                            console.log(1)
+                            if(publication.scores[i].user==SessionStore.data.username){
+                                ownIndex = i
+                                oldScoreFound = true
+                            }
+                        }
+
+                        if(ownIndex!=-1){
+                            publication.ownScore = publication.scores[ownIndex].score
+                            publication.ownComment = publication.scores[ownIndex].comment
+                            publication.scores.splice(ownIndex,1)
+                        }
+
+
+                        publication.averageScore = sumOfScores / publication.numberOfScores
+                    }
+
+                    else{
+                        publication.scores = []
+                    }
+                    
+                    if(!oldScoreFound){
+                        publication.ownScore = 0
+                        publication.ownComment = ""
+                    }
+                });
+
+                this.tableItems = rawItems
                 this.persistedLoading = false
             }).catch(error => console.log(error))
+        },
+
+        updateScore(publication){
+            this.$http.post(`/score/${SessionStore.data.reviewId}?doi=${publication["_id"]}`,{"username":SessionStore.data.username,"score":publication.ownScore,"comment":publication.ownComment})
+            .then(() => {console.log(`Set in doi ${publication["_id"]} score for ${SessionStore.data.username} to ${publication.ownScore} and comment to ${publication.ownComment}`);
+                    publication.numberOfScores = publication.scores.length + 1
+                    let sumOfScores = publication.ownScore
+                    publication.scores.forEach(element => {
+                        sumOfScores +=element.score                      
+                    });
+                    publication.averageScore = sumOfScores/publication.numberOfScores
+                })
+            .catch(error => console.log(error))
         },
 
         onRowClicked(row) {
