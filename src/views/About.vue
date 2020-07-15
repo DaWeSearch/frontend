@@ -27,8 +27,8 @@
                 controls
                 indicators
                 background="black"
-                img-width="1024"
-                img-height="480"
+                img-width="512"
+                img-height="240"
                 style="text-shadow: 1px 1px 2px #333;"
                 @sliding-start="onSlideStart"
                 @sliding-end="onSlideEnd"
@@ -50,7 +50,7 @@
             <b-carousel-slide
                     caption="You want to know more about systematic literature review?"
                     text="Watch this longer video in English and get lit"
-                    img-src="https://images.pexels.com/photos/1333742/pexels-photo-1333742.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+                    img-src="https://images.pexels.com/photos/1106468/pexels-photo-1106468.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
             >
                 <b-embed
                         type="iframe"
@@ -64,7 +64,7 @@
             <b-carousel-slide
                     caption="How to use our tool"
                     text="Demo video is coming soon"
-                    img-src="https://images.pexels.com/photos/2946979/pexels-photo-2946979.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260">
+                    img-src="https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500">
                 <b-embed
                         type="iframe"
                         aspect="16by9"
@@ -74,6 +74,26 @@
             </b-carousel-slide>
         </b-carousel>
 
+        <p> This tool was developed by students at the institute for Information Systems Engineering (ISE) at the Technische Universität Berlin.</p>
+        <b-link @click="newTab()"> For more information click here</b-link>
+        <p><b-link size="sm" class="mb-2" @click="github()">
+            <b-icon icon="fa fa-github" aria-hidden="true"></b-icon>
+            Visit us on Github!
+        </b-link></p>
+
+
     </div>
 </template>
 
+<script>
+    export default {
+        methods: {
+            newTab: function () {
+                window.open("https://www.ise.tu-berlin.de/menue/information_systems_engineering/", "_blank");
+            },
+            github : function () {
+                window.open("https://github.com/DaWeSys/backend");
+            }
+        }
+    }
+</script>
