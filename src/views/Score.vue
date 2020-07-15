@@ -27,29 +27,44 @@
             </template>
 
             <template v-slot:row-details="row">
-                
-                <b-row>
-                    <b-col cols="10">
-                        <b-form-textarea
-                        id="textarea"
-                        v-model="row.item.ownComment"
-                        placeholder="Write your comment here"
-                        rows="1"
-                        max-rows="6"
-                        ></b-form-textarea>
-                    </b-col>
-                    <b-col cols="2">
-                        <b-form-rating v-model="row.item.ownScore"></b-form-rating>
-                        <b-button pill @click="updateScore(row.item)">Save</b-button>
-                    </b-col>
-                </b-row>
-                
-                <!--             ABSTRACT NICHT NOETIG WEIL MAN SICH ZEIT NIMMT  --- bei nutzung v-slot:row-details="row" in template tage packen-->
-                <b-row>
-                <b-col cols="1"></b-col>
-                <b-col cols="10"><p>{{row.item.abstract}}</p></b-col>
-                <b-col cols="1"></b-col>
-                </b-row>
+                <b-container>
+                    <b-row>
+                        <b-col cols="10">
+                            <b-form-textarea
+                            id="textarea"
+                            v-model="row.item.ownComment"
+                            placeholder="Write your comment here"
+                            rows="1"
+                            max-rows="6"
+                            ></b-form-textarea>
+                        </b-col>
+                        <b-col cols="2">
+                            <b-form-rating v-model="row.item.ownScore"></b-form-rating>
+                            <b-button pill @click="updateScore(row.item)">Save</b-button>
+                        </b-col>
+                    </b-row>
+
+                    <b-row class="my-3">
+                        <b-col cols="1"></b-col>
+                        <b-col cols="10"><p>{{row.item.abstract}}</p></b-col>
+                        <b-col cols="1"></b-col>
+                    </b-row>
+
+                    <b-row class="my-3" v-for="score in row.item.scores" :key="score.user">
+                        <b-col cols="2">
+                            {{score.user}}
+                            <b-form-rating v-model="score.score" readonly></b-form-rating>
+                        </b-col>
+                        <b-col cols="10">
+                            <b-form-textarea
+                            plaintext :value="score.comment"
+                            rows="1"
+                            max-rows="6"
+                            ></b-form-textarea>
+                        </b-col>
+                    </b-row>
+
+                </b-container>
             </template>
 
         </b-table>
@@ -114,8 +129,6 @@ export default {
                         let ownIndex = -1
                         for(let i=0; i<publication.scores.length; i++){
                             sumOfScores += publication.scores[i].score
-                            console.log(publication.scores[i].comment)
-                            console.log(1)
                             if(publication.scores[i].user==SessionStore.data.username){
                                 ownIndex = i
                                 oldScoreFound = true
