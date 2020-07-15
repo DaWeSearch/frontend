@@ -48,7 +48,7 @@ export default {
         onSubmit(evt){
             evt.preventDefault()
             this.$http.post('/login',{"username":this.username,"password":this.password})
-            .then(data => {console.log("hier ist ein signupresponse");
+            .then(data => {console.log("hier ist ein login");
                             SessionStore.data.authenticationToken=data.data;
                             SessionStore.data.username=this.username;
                             console.log(SessionStore.data.authenticationToken);

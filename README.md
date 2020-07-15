@@ -1,8 +1,8 @@
 # dawesearch
 
-## Link zur Website
+## Link to website
 ```
-https://dawesys.github.io/deploy/#/login
+[To website](https://dawesys.github.io/deploy/#/login)
 ```
 
 ## Project setup

@@ -2,16 +2,16 @@
     <div class="search">
         <b-nav tabs >
             <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
-            <b-nav-item active disabled><router-link to="/search">Search</router-link></b-nav-item>
+            <b-nav-item active disabled>Search</b-nav-item>
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
             <b-button squared class="ml-auto" variant="">Log out</b-button>
         </b-nav>
 
         <b-container fluid>
            
-            <b-row>
-                <b-col class="ml-5" cols="3">
-                    <b-input-group class="my-5">
+            <b-row class="ml-5 my-5">
+                <b-col  cols="3">
+                    <b-input-group>
                         <b-form-input v-model="newSearchGroup" @keypress.enter="addSearchGroup()" placeholder="First term of new search category to include" ></b-form-input>
                         <b-input-group-append>
                             <b-button variant="info" @click="addSearchGroup()"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
@@ -70,7 +70,7 @@
                 </b-col>
             </b-row>
 
-            <b-row class="my-5 ml-5">
+            <b-row class="ml-5 my-5">
                 <b-col cols="2">
                     Search in
                     <b-form-select v-model="selectedSearchFields" :options="searchFieldOptions"></b-form-select>
@@ -88,6 +88,8 @@
                 <b-col cols="8"></b-col>
             </b-row>
         </b-container>
+
+        <b-spinner v-if="resultsLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
         
         <b-container fluid v-if="tableItems.length>0">
             <b-button class="my-3" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
@@ -98,7 +100,7 @@
 
         </b-container>
 
-        <b-table v-if="tableItems.length>0" fixed hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
+        <b-table v-if="tableItems.length>0" hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
         
             <template v-slot:cell(uri)="row">
                 <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">{{row.item.uri}}</b-link>
@@ -127,6 +129,7 @@ export default {
     name: 'Search',
     data: () => {
         return {
+            resultsLoading: false,
             newSearchGroup:"",
             newField: "",
             exclude_terms: [],
@@ -144,6 +147,7 @@ export default {
             pagecount: 0,
             displayedPage: 1,
             pageLength: 50,
+            queryUsedForSearch: null,
             totalNum: 0,// num of persisted entries on db
             wrapperResponses: null,
             fields: ['doi','publicationDate', 'title','authors','publicationName','publisher','uri'],
@@ -183,11 +187,11 @@ export default {
         
         buildQuery(){
             let query = {
-                "search_groups": [{"search_terms":this.exclude_terms,"match":"NOT"},
-                                    ...this.search_groups
+                "search_groups": [{"search_terms":[...this.exclude_terms],"match":"NOT"},
+                                    ...JSON.parse(JSON.stringify(this.search_groups)) // deepcopy since user can change category after submitting query
                                 ].filter( searchGroup => searchGroup.search_terms.length>0),
                 "match": "AND",
-                "fields": this.selectedSearchFields,
+                "fields": [...this.selectedSearchFields],// copy since user can change selectedSearchFields after submitting query
             };
             
             return query
@@ -196,6 +200,7 @@ export default {
         processWrapperResponses(){
             console.log(this.wrapperResponses)
             this.tableItems = []
+            this.totalNum = 0
             this.wrapperResponses.forEach(d=>{
                 this.totalNum += parseInt(d.result.total)
                 console.log(`d.result.total ${d.result.total}`)
@@ -205,13 +210,15 @@ export default {
             })
         },
 
-        onSubmitSearch(evt){
-            evt.preventDefault();
-            
-            this.$http.post(`/query?page=${this.displayedPage}`,{"search":this.buildQuery()}) /*?page_length=${this.pageLength}*/
+        onSubmitSearch(){
+            this.tableItems = []
+            this.resultsLoading = true
+            this.queryUsedForSearch = this.buildQuery()
+            this.$http.post(`/query?page=${this.displayedPage}&page_length=${this.pageLength}`,{"search":this.queryUsedForSearch})
             .then(data => {
                 this.wrapperResponses = data.data
                 this.processWrapperResponses()
+            this.resultsLoading = false
             }).catch(error => console.log(error))
         },
 
@@ -220,7 +227,9 @@ export default {
         },
 
         persist(){
-            
+            this.$http.post(`persist/${SessionStore.data.reviewId}/list`,{"results":this.tableItems,"search":this.queryUsedForSearch})
+            .then(data => console.log(`persisted ${data}`))
+            .catch(error => console.log(error))
         },
     }
 }

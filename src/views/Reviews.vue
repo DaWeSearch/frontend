@@ -1,45 +1,60 @@
 <template>
     <div id="reviews">
         <b-nav tabs >
-            <b-nav-item active><router-link to="/">Reviews</router-link></b-nav-item>
-            <b-nav-item><router-link to="/search">Search</router-link></b-nav-item>
-            <b-nav-item> <router-link to="/score">Score</router-link></b-nav-item>
+            <b-nav-item active disabled>Reviews</b-nav-item>
             <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
+            <b-button squared class="ml-auto" variant="">Log out</b-button>
         </b-nav>
 
-        
-        <b-card v-for="review in reviews" :key="getReviewId(review)"
-                overlay
-                img-src="https://upload.wikimedia.org/wikipedia/commons/3/3e/UB_TU_Berlin_Innenhof.JPG"
-                img-alt="Card Image"
-                text-variant="white"
-                :title= review.owner
-                :sub-title=review.description
-        class="m-5"
-        :header="review.name"
-        header-tag="header" 
-        footer-tag="footer"
-        >   
-            <p>{{review.owner}}</p>
-            <p>{{review.description}}</p>
-            <p>{{review.result_collection}}</p>
-            <p>Teilnehmer erstellungsdatum und link zu den searches und dem scoring bereich</p>
+        <b-container>
+            <b-card class="mt-3 mb-5"
+            header="Create review">
+                <b-row>
+                    <b-col>
+                        <b-form-input type="text" v-model="newReviewName" placeholder="Name of new Review"></b-form-input>
+                    </b-col>
+                    <b-col>
+                        <b-button type="button" variant="primary" @click="createReview()">Create</b-button>
+                    </b-col>
+                </b-row>
+                <b-form-textarea class="my-3" type="text" v-model="newReviewDescription" placeholder="Description of new Review"></b-form-textarea>
+            </b-card>
 
+            <b-spinner v-if="reviewsLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
 
-            <b-button @click="search(review)">Search and select publications</b-button>
-            <b-button @click="score(review)">Score selected publications</b-button>
-            
-            <template v-slot:footer="review">
-                <b-form-input type="text"></b-form-input>
-                <b-button @click="addUserToReview(review)" variant="primary">Add user</b-button>
-                <b-button @click="deleteReview(review)" variant="primary">Delete review</b-button>
-            </template>
-        </b-card>
+            <b-row>
+                <b-col class="mb-3" v-for="(review,index) in reviews" :key="getReviewId(review)" cols="6">
+                    <b-card 
+                    :title="review.name"
+                    footer-tag="footer"
+                    >   
+                        <p>Created by {{review.owner}}</p>
+                        <p>{{review.description}}</p>
+                        <!--<p>{{review.result_collection}}</p>-->
 
-        
-        <b-form-input type="text" v-model="newReviewName"></b-form-input>
-        <b-form-input type="text" v-model="newReviewDescription"></b-form-input>
-        <b-button type="button" variant="primary" @click="createReview()">Create review</b-button>
+                        
+                        <template v-slot:footer>
+                            <b-row>
+                                <b-col>
+                                    <b-input-group class="m-1">
+                                        <b-form-input v-model="review.newUser" placeholder="Username to add"></b-form-input>
+                                        <b-input-group-append>
+                                            <b-button @click="addUserToReview(review)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                        </b-input-group-append>
+                                    </b-input-group>
+                                    <b-button class="m-1" @click="deleteReview(review,index)" >Delete review</b-button>
+                                </b-col>
+                                <b-col>
+                                    <b-button class="m-1" variant="info" @click="search(review)">Search for publications</b-button>
+                                    <b-button class="m-1" variant="info" @click="score(review)">Score selected publications</b-button>
+                                </b-col>
+                            </b-row>
+                        </template>
+                    </b-card>
+
+                </b-col>
+            </b-row>
+        </b-container>
     </div>
 </template>
 
@@ -51,9 +66,10 @@ export default {
     name: "Reviews",
     data: () => {
         return {
+            reviewsLoading: true,
             newReviewName: "",
             newReviewDescription: "",
-            reviews: [  {"name": "New Review 1", // static for development
+            reviews: [  /*{"name": "New Review 1", // static for development     REVIEWS KÖNNTE MAN AUCH IM SESSION STORE SPEICHERN DAMIT NICHT JEDES MAL GEPULLT WERDEN MUSS
                         "owner": "testu",
                         "result_collection": "results-None",
                         "description": "Add review test 1",
@@ -73,7 +89,7 @@ export default {
                         "description": "Add review test 3",
                         "_id": {"$oid": "5f01fde055e9c2fbc462ad0c"},
                         "_cls": "functions.db.models.Review"
-                        }
+                        }*/
             ]
         }
     },
@@ -84,64 +100,72 @@ export default {
             this.$router.push("/login")
         }
         else{
-            //this.getReviews();                              //AUTO GET REVIEWS REQUESTS INACTIVE FOR DEVELOPEMENT
+            this.getReviews();                              //AUTO GET REVIEWS REQUESTS INACTIVE FOR DEVELOPEMENT
             console.log("load reviews")           
         }
     },
 
     methods: {
         getReviews(){
+            this.reviews = []
+            this.reviewsLoading = true
+
             this.$http.get(`/users/${SessionStore.data.username}/reviews`)
             .then(data => {console.log("get reviews");
-                            console.log(data.data.reviews);
                             this.reviews = data.data.reviews[0];//reviews sind in ansonsten lehrer liste irgendwie
+                            this.reviewsLoading = false
                             })
             .catch(error => {console.log(error);}); 
         },
 
-        getReviewId(review){
-            return review["_id"]["$oid"]
+        getReviewId(reviewToIdentify){
+            return reviewToIdentify["_id"]["$oid"]
         },
 
-        search(review){
-            SessionStore.data.reviewId = this.getReviewId(review)
+        search(reviewToSearchIn){
+            SessionStore.data.reviewId = this.getReviewId(reviewToSearchIn)
+            console.log(`search in review ${SessionStore.data.reviewId}`)
             this.$router.push("/search") // später reviews/reviewname/search waere cool
         },
 
-        score(review){
-            SessionStore.data.reviewId = this.getReviewId(review)
+        score(reviewToScoreIn){
+            SessionStore.data.reviewId = this.getReviewId(reviewToScoreIn)
+            console.log(`score in review ${SessionStore.data.reviewId}`)
             this.$router.push("/score") // später reviews/reviewname/score waere cool
         },
 
         createReview() {
-            this.$http.post("/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
-            .then(data => {console.log("add review");
-                            console.log(data.data);
-                            this.reviews.push(data.data)
-                            })
-            .catch(error => {console.log(error);});
-        },
-
-        deleteReview(review) {
-            this.$http.delete(`/review/${review.getReviewId}`)
-            .then(data => console.log(data))
-            .catch(error => {console.log(error);});
-        },
-
-        addUserToReview(review) {
-            this.$http.post(`/review/${SessionStore.data.reviewId}/collaborator`, {"username": SessionStore.data.username})
+            if(this.newReviewName.length > 0){
+                this.$http.post("/review",{"owner_name":SessionStore.data.username,"name": this.newReviewName, "description": this.newReviewDescription})
                 .then(data => {console.log("add review");
-                    console.log(data.data);
-                    this.reviews.push(data.data)
-                })
-            console.log(review)
+                                this.reviews.push(data.data)
+                                })
+                .catch(error => {console.log(error);});
+            }
+            else{
+                console.log("cant create review without reviewname")
+            }
         },
-    },
 
-    computed: {
-        rows() {
-            return this.items.length
-        }
+        deleteReview(reviewToDelete,index) {
+            console.log(`delete review ${index} id ${this.getReviewId(reviewToDelete)}`);
+            this.reviews.splice(index,1)
+            this.$http.delete(`/review/${this.getReviewId(reviewToDelete)}`)
+            .then(console.log("deleted"))
+            .catch(error => {console.log(error);});
+        },
+
+        addUserToReview(reviewToAddUsernameTo) {
+            if(reviewToAddUsernameTo.newUser.length > 0){
+                console.log(`add user ${null} to review id ${this.getReviewId(reviewToAddUsernameTo)}`);
+                this.$http.post(`review/${this.getReviewId(reviewToAddUsernameTo)}/collaborator?username=${reviewToAddUsernameTo.newUser}`)
+                .then(console.log("added user"))
+                .catch(error => {console.log(error)});
+            }
+            else{
+                console.log("cant add user without username")
+            }
+        },
     }
 }
 </script>
