@@ -75,7 +75,7 @@
                     Select literature database fields to search in
                     <b-form-select v-model="selectedSearchFields" :options="searchFieldOptions"></b-form-select>
                 </b-col>
-                
+                <!--
                 <b-col cols="2">
                     Result page index
                     <div class="mx-5 p-3">
@@ -88,10 +88,10 @@
                     <div class="mx-5 p-3">
                         <b-form-input size="sm" v-model="pageLength" placeholder="Page"></b-form-input>
                     </div>
-                </b-col>
+                </b-col>-->
 
                 <b-col cols="1">
-                    <b-button @click="onSubmitSearch" variant="primary">Search</b-button>
+                    <b-button @click="onSubmitSearch" variant="info">Search</b-button>
                 </b-col>
 
                 <b-col cols="8"></b-col>
@@ -107,7 +107,7 @@
             <div v-for="wrapperResponse in wrapperResponses" :key="wrapperResponse.total"> <!-- TOTAL ALS KEY SEHR UNSICHER-->
                 <p v-if="wrapperResponse.records.length>0">{{wrapperResponse.records[0].publisher}}: {{wrapperResponse.result.total}}</p>            
             </div>
-            <b-button class="my-2" variant="primary" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
+            <b-button class="my-2" variant="info" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
             <p>Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored </p>
 
 

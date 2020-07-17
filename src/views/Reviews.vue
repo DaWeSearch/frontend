@@ -14,7 +14,7 @@
                         <b-form-input type="text" v-model="newReviewName" placeholder="Name of new Review"></b-form-input>
                     </b-col>
                     <b-col>
-                        <b-button type="button" variant="primary" @click="createReview()">Create</b-button>
+                        <b-button variant="info" @click="createReview()">Create</b-button>
                     </b-col>
                 </b-row>
                 <b-form-textarea class="my-3" type="text" v-model="newReviewDescription" placeholder="Description of new Review"></b-form-textarea>
@@ -36,17 +36,17 @@
                         <template v-slot:footer>
                             <b-row>
                                 <b-col>
-                                    <b-input-group class="m-1">
+                                    <b-input-group block class="m-1">
                                         <b-form-input v-model="review.newUser" placeholder="Username to add"></b-form-input>
                                         <b-input-group-append>
                                             <b-button @click="addUserToReview(review)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
                                         </b-input-group-append>
                                     </b-input-group>
-                                    <b-button class="m-1" @click="deleteReview(review,index)" >Delete review</b-button>
+                                    <b-button block class="m-1" @click="deleteReview(review,index)" >Delete review</b-button>
                                 </b-col>
                                 <b-col>
-                                    <b-button class="m-1" variant="info" @click="search(review)">Search for publications</b-button>
-                                    <b-button class="m-1" variant="info" @click="score(review)">Score selected publications</b-button>
+                                    <b-button block class="m-1" variant="info" @click="search(review)">Search for publications</b-button>
+                                    <b-button block class="m-1" variant="info" @click="score(review)">Score selected publications</b-button>
                                 </b-col>
                             </b-row>
                         </template>
