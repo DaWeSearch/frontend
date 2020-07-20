@@ -12,6 +12,7 @@
     "bootstrap-vue": "^2.1.0",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
+    "vue-d3-cloud": "^0.2.0",
     "vue-router": "^3.2.0"
   },
   "devDependencies": {

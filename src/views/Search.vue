@@ -110,7 +110,7 @@
             <b-button class="my-2" variant="info" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
             <p>Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored </p>
 
-
+            <cloud :data="keyWords" :fontSizeMapper="fontSizeMapper" />
         </b-container>
 
         <b-table v-if="tableItems.length>0" hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
@@ -145,11 +145,14 @@
 
 <script>
 import SessionStore from "../stores/SessionStore"
+import Cloud from 'vue-d3-cloud'
 
 export default {
     name: 'Search',
     data: () => {
         return {
+            keyWords: null,
+            fontSizeMapper: word => Math.log2(word.value) * 40,
             resultsLoading: false,
             newSearchGroup:"",
             newField: "",
@@ -159,11 +162,11 @@ export default {
             searchFieldOptions: [{ value: ["all"], text: 'all fields' },  //option groups auch interessant siehe form-select docs
                                 { value: ["keywords"], text: 'keywords only' },
                                 { value: ["title"], text: 'title only' },
-                                { value: ["abstract"], text: 'abstract only' },
+                                //{ value: ["abstract"], text: 'abstract only' },
                                 { value: ["keywords","title"], text: 'keywords and title' },
-                                { value: ["keywords","abstract"], text: 'keywords and abstract' },
-                                { value: ["title","abstract"], text: 'title and abstract' },
-                                { value: ["keywords","title","abstract"], text: 'keywords,title and abstract' }
+                                //{ value: ["keywords","abstract"], text: 'keywords and abstract' },
+                                //{ value: ["title","abstract"], text: 'title and abstract' },
+                                //{ value: ["keywords","title","abstract"], text: 'keywords,title and abstract' }
                                 ],
             pagecount: 0,
             displayedPage: 1,
@@ -213,8 +216,8 @@ export default {
         
         buildQuery(){
             let query = {
-                "search_groups": [{"search_terms":[...this.exclude_terms],"match":"NOT"},
-                                    ...JSON.parse(JSON.stringify(this.search_groups)) // deepcopy since user can change category after submitting query
+                "search_groups": [...JSON.parse(JSON.stringify(this.search_groups)), // deepcopy since user can change category after submitting query
+                                    {"search_terms":[...this.exclude_terms],"match":"NOT"}
                                 ].filter( searchGroup => searchGroup.search_terms.length>0),
                 "match": "AND",
                 "fields": [...this.selectedSearchFields],// copy since user can change selectedSearchFields after submitting query
@@ -227,10 +230,12 @@ export default {
             console.log(this.wrapperResponses)
             this.tableItems = []
             this.totalNum = 0
+            this.keyWords = []
             this.wrapperResponses.forEach(d=>{
                 this.totalNum += parseInt(d.result.total)
                 console.log(`d.result.total ${d.result.total}`)
                 if(d.records.length > 0){
+                    this.keyWords.push(...d.facets.keywords)
                     this.tableItems.push(...d.records) 
                 }
             })
@@ -244,7 +249,7 @@ export default {
             .then(data => {
                 this.wrapperResponses = data.data
                 this.processWrapperResponses()
-            this.resultsLoading = false
+                this.resultsLoading = false
             }).catch(error => console.log(error))
         },
 
@@ -262,6 +267,10 @@ export default {
             .then(data => console.log(`persisted ${data}`))
             .catch(error => console.log(error))
         },
+    },
+
+    components: {
+        Cloud,
     }
 }
 </script>

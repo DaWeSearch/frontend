@@ -1,17 +1,10 @@
 const SessionStore = {
   data: {
-    username: "",
+    username: null,
     authenticationToken: null,
-    review: {
-      reviewId: null,
-
-    }
-
+    reviewId: null,
   },
   methods: {
-    setAuth(token){
-      SessionStore.authenticationToken = token
-    }
   }
 }
 
