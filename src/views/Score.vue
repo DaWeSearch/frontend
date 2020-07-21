@@ -1,11 +1,11 @@
 <template>
     <div class="score">
-        <b-nav tabs >
-            <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
+        <b-nav id="nav">
+            <b-nav-item><b-link to="/">Reviews</b-link></b-nav-item>
+            <b-nav-item>></b-nav-item>
             <b-nav-item active disabled>Score</b-nav-item>
-            <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
-            <b-button squared class="ml-auto" variant="">Log out</b-button>
-    
+            <b-nav-item class="ml-auto"><b-link to="/about">About</b-link></b-nav-item>
+            <b-button squared>Log out</b-button>
         </b-nav>
         
         <b-table hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">

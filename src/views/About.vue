@@ -1,24 +1,7 @@
 <template>
     <div class="about">
-        <b-nav tabs>
-            <b-nav-item disabled>
-                <router-link to="/">Reviews</router-link>
-            </b-nav-item>
-            <b-nav-item disabled>
-                <router-link to="/search">Search</router-link>
-            </b-nav-item>
-            <b-nav-item disabled>
-                <router-link to="/score">Score</router-link>
-            </b-nav-item>
-            <b-nav-item active>
-                <router-link to="/about">About</router-link>
-            </b-nav-item>
-            <b-nav-item>
-                <router-link to="/login">Login</router-link>
-            </b-nav-item>
-        </b-nav>
         <b-jumbotron header="DaWeSearch" lead="A tool accelerating your systematic literature review" >
-            <b-button variant="primary" href="/login">Get started!</b-button>
+            <b-button variant="light" v-if="!username"><b-link  to="/login">Get started!</b-link></b-button>
         </b-jumbotron>
         <b-carousel
                 id="carousel-1"
@@ -86,8 +69,16 @@
 </template>
 
 <script>
+import SessionStore from "../stores/SessionStore"
     export default {
+        name: 'About',
+        data: () => {
+            return {
+                username: SessionStore.data.username
+            };
+        },
         methods: {
+            username: SessionStore.data.username,
             newTab: function () {
                 window.open("https://www.ise.tu-berlin.de/menue/information_systems_engineering/", "_blank");
             },

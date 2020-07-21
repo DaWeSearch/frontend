@@ -1,10 +1,11 @@
 <template>
     <div class="search">
-        <b-nav tabs >
-            <b-nav-item><router-link to="/">Reviews</router-link></b-nav-item>
+        <b-nav id="nav">
+            <b-nav-item><b-link to="/">Reviews</b-link></b-nav-item> 
+            <b-nav-item>></b-nav-item>
             <b-nav-item active disabled>Search</b-nav-item>
-            <b-nav-item><router-link to="/about">About</router-link></b-nav-item>
-            <b-button squared class="ml-auto" variant="">Log out</b-button>
+            <b-nav-item class="ml-auto"><b-link to="/about">About</b-link></b-nav-item>
+            <b-button squared>Log out</b-button>
         </b-nav>
 
         <b-container fluid>
@@ -230,12 +231,11 @@ export default {
             console.log(this.wrapperResponses)
             this.tableItems = []
             this.totalNum = 0
-            this.keyWords = []
+            this.keyWords = this.wrapperResponses[0].facets.keywords
             this.wrapperResponses.forEach(d=>{
                 this.totalNum += parseInt(d.result.total)
                 console.log(`d.result.total ${d.result.total}`)
                 if(d.records.length > 0){
-                    this.keyWords.push(...d.facets.keywords)
                     this.tableItems.push(...d.records) 
                 }
             })
