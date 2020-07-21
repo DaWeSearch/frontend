@@ -7,6 +7,7 @@
         </b-nav>
 
         <b-container>
+            <h3 >Welcome {{ownUsername}}!</h3>
             <b-card class="mt-3 mb-5"
             header="Create review">
                 <b-row>
@@ -66,6 +67,7 @@ export default {
     name: "Reviews",
     data: () => {
         return {
+            ownUsername : SessionStore.data.username,
             reviewsLoading: true,
             newReviewName: "",
             newReviewDescription: "",
