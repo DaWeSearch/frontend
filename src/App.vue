@@ -28,7 +28,7 @@
 
 #nav a {
   font-weight: bold;
-  color: #2c3e50;
+  color: #17a2b8/*2c3e50*/;
 }
 
 router-link {
