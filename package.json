@@ -13,6 +13,7 @@
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-d3-cloud": "^0.2.0",
+    "vue-map-chart": "0.0.2",
     "vue-router": "^3.2.0"
   },
   "devDependencies": {

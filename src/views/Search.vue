@@ -111,7 +111,21 @@
             <b-button class="my-2" variant="info" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
             <p>Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored </p>
 
-            <cloud :data="keyWords" :fontSizeMapper="fontSizeMapper" />
+            <b-row>
+                <b-col class="p-5">
+                    <cloud :data="keyWords" :fontSizeMapper="fontSizeMapper" />
+                </b-col>
+                <b-col class="p-5">
+                    <MapChart
+                    :countryData="countryData"
+                    highColor="#ff0000"
+                    lowColor="#aaaaaa"
+                    countryStrokeColor="#909090"
+                    defaultCountryFillColor="#dadada"
+                    />
+                </b-col>
+            </b-row>
+
         </b-container>
 
         <b-table v-if="tableItems.length>0" hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
@@ -147,12 +161,14 @@
 <script>
 import SessionStore from "../stores/SessionStore"
 import Cloud from 'vue-d3-cloud'
+import MapChart from 'vue-map-chart'
 
 export default {
     name: 'Search',
     data: () => {
         return {
             keyWords: null,
+            countryData: null,
             fontSizeMapper: word => Math.log2(word.value) * 40,
             resultsLoading: false,
             newSearchGroup:"",
@@ -169,12 +185,11 @@ export default {
                                 //{ value: ["title","abstract"], text: 'title and abstract' },
                                 //{ value: ["keywords","title","abstract"], text: 'keywords,title and abstract' }
                                 ],
-            pagecount: 0,
             displayedPage: 1,
             pageLength: 50,
             queryUsedForSearch: null,
-            totalNum: 0,// num of persisted entries on db
             wrapperResponses: null,
+            totalNum: 0,// num of persisted entries on db
             fields: ['doi','P','dismiss','publicationDate', 'title','authors','publicationName','publisher','uri'],
             tableItems: []
         };
@@ -232,6 +247,7 @@ export default {
             this.tableItems = []
             this.totalNum = 0
             this.keyWords = this.wrapperResponses[0].facets.keywords
+            this.countryData = this.wrapperResponses[0].facets.countries
             this.wrapperResponses.forEach(d=>{
                 this.totalNum += parseInt(d.result.total)
                 console.log(`d.result.total ${d.result.total}`)
@@ -271,6 +287,7 @@ export default {
 
     components: {
         Cloud,
+        MapChart
     }
 }
 </script>
