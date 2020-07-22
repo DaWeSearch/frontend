@@ -8,7 +8,10 @@
 
         <b-container>
             <h3 >Welcome {{ownUsername}}!</h3>
-            <b-card class="mt-3 mb-5"
+
+            <b-button class="my-3" v-if="hideReviewEditor" @click="showReviewEditor()" >Add new Review</b-button>
+
+            <b-card v-if="!hideReviewEditor" class="mt-3 mb-5"
             header="Create review">
                 <b-row>
                     <b-col>
@@ -21,7 +24,9 @@
                 <b-form-textarea class="my-3" type="text" v-model="newReviewDescription" placeholder="Description of new Review"></b-form-textarea>
             </b-card>
 
-            <b-spinner v-if="reviewsLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
+            <div>
+                <b-spinner v-if="reviewsLoading" class="mx-auto my-5" label="Spinning"></b-spinner>
+            </div>
 
             <b-row>
                 <b-col class="mb-3" v-for="(review,index) in reviews" :key="getReviewId(review)" cols="6">
@@ -67,6 +72,7 @@ export default {
     name: "Reviews",
     data: () => {
         return {
+            hideReviewEditor: true,            
             ownUsername : SessionStore.data.username,
             reviewsLoading: true,
             newReviewName: "",
@@ -108,6 +114,10 @@ export default {
     },
 
     methods: {
+        showReviewEditor(){
+            this.hideReviewEditor = false
+        },
+
         getReviews(){
             this.reviews = []
             this.reviewsLoading = true
