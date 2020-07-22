@@ -76,20 +76,6 @@
                     Select literature database fields to search in
                     <b-form-select v-model="selectedSearchFields" :options="searchFieldOptions"></b-form-select>
                 </b-col>
-                <!--
-                <b-col cols="2">
-                    Result page index
-                    <div class="mx-5 p-3">
-                        <b-form-input size="sm" v-model="displayedPage" placeholder="Page"></b-form-input>
-                    </div>
-                </b-col>
-                
-                <b-col cols="2">
-                    Number of publications
-                    <div class="mx-5 p-3">
-                        <b-form-input size="sm" v-model="pageLength" placeholder="Page"></b-form-input>
-                    </div>
-                </b-col>-->
 
                 <b-col cols="1">
                     <b-button @click="onSubmitSearch" variant="info">Search</b-button>
@@ -104,28 +90,36 @@
         <p v-if="!resultsLoading && tableItems.length==0" class="mx-auto my-5">{{!queryUsedForSearch ? "You can use the categories as groups of synonyms" : "NOTHING FOUND"}}</p>
         
         <b-container fluid v-if="tableItems.length>0">
-            <p>Total numbers of publications fitting the request in each corresponding literature database</p>
-            <div v-for="wrapperResponse in wrapperResponses" :key="wrapperResponse.total"> <!-- TOTAL ALS KEY SEHR UNSICHER-->
-                <p v-if="wrapperResponse.records.length>0">{{wrapperResponse.records[0].publisher}}: {{wrapperResponse.result.total}}</p>            
+            <div v-if="displayedPage==1"> <!-- statistics -->
+                <p>Makeup of publications of the {{ totalNum }} publications fitting the request in each corresponding literature database</p>
+                
+                <div v-for="wrapperResponse in wrapperResponses" :key="wrapperResponse.total"> <!-- TOTAL ALS KEY SEHR UNSICHER-->
+                    <p v-if="wrapperResponse.records.length>0">{{wrapperResponse.records[0].publisher}}: {{wrapperResponse.result.total}}</p>            
+                </div>
+
+                <b-row>
+                    <b-col class="p-5">
+                        <cloud :data="keyWords" :fontSizeMapper="fontSizeMapper" />
+                    </b-col>
+                    <b-col class="p-5">
+                        <MapChart
+                        :countryData="countryData"
+                        highColor="#ff0000"
+                        lowColor="#aaaaaa"
+                        countryStrokeColor="#909090"
+                        defaultCountryFillColor="#dadada"
+                        />
+                    </b-col>
+                </b-row>
             </div>
-            <b-button class="my-2" variant="info" @click="persist">Persist these {{ tableItems.length }} out of {{ totalNum }} availible Publications</b-button>
-            <p>Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored </p>
-
-            <b-row>
-                <b-col class="p-5">
-                    <cloud :data="keyWords" :fontSizeMapper="fontSizeMapper" />
-                </b-col>
-                <b-col class="p-5">
-                    <MapChart
-                    :countryData="countryData"
-                    highColor="#ff0000"
-                    lowColor="#aaaaaa"
-                    countryStrokeColor="#909090"
-                    defaultCountryFillColor="#dadada"
-                    />
-                </b-col>
-            </b-row>
-
+                
+            <b-button class="my-3" variant="info" @click="persist">Persist these {{ tableItems.length }} displayed publications</b-button>
+            <b-button-group class="ml-2">
+                <b-button @click="changePage(-1)" v-if="displayedPage>1" variant="info">Previous page</b-button>
+                <b-button @click="changePage(1)" v-if="biggestTotal-((pageLength/wrapperResponses.length)*displayedPage)>0" variant="info">Next page</b-button>
+            </b-button-group>
+            <p>Already persisted publications(<b-icon-intersect></b-icon-intersect>) will be ignored when persisting</p>
+            <b-alert class="mx-auto w-25" v-model="successfullyPersisted" variant="info" dismissible>Successfully persisted these publications!</b-alert>
         </b-container>
 
         <b-table v-if="tableItems.length>0" hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
@@ -133,19 +127,19 @@
             <template v-slot:cell(P)="row">
                 <b-icon-intersect v-if="row.item.persisted"></b-icon-intersect>
             </template>
-
+            
             <template v-slot:cell(dismiss)="row">
                 <b-button size="sm" variant="light" @click="dismissItem(row.index)"><b-icon-dash-circle-fill size="sm" variant="danger"></b-icon-dash-circle-fill></b-button>
             </template>
-
+            
             <template v-slot:cell(authors)="row">
                 {{ row.item.authors.join(" - ") }}
-            </template>
-        
+            </template>     
+            
             <template v-slot:cell(uri)="row">
                 <b-link target="_blank" rel="noopener noreferrer" :href="row.item.uri">Click</b-link>
             </template>
-
+            
             <template v-slot:row-details="row">
                 <b-row>
                     <b-col cols="1"></b-col>
@@ -176,22 +170,20 @@ export default {
             exclude_terms: [],
             search_groups: [{"search_terms":[],"match":"OR"}],
             selectedSearchFields: ["all"],
-            searchFieldOptions: [{ value: ["all"], text: 'all fields' },  //option groups auch interessant siehe form-select docs
+            searchFieldOptions: [{ value: ["all"], text: 'all fields' },
                                 { value: ["keywords"], text: 'keywords only' },
                                 { value: ["title"], text: 'title only' },
-                                //{ value: ["abstract"], text: 'abstract only' },
                                 { value: ["keywords","title"], text: 'keywords and title' },
-                                //{ value: ["keywords","abstract"], text: 'keywords and abstract' },
-                                //{ value: ["title","abstract"], text: 'title and abstract' },
-                                //{ value: ["keywords","title","abstract"], text: 'keywords,title and abstract' }
                                 ],
             displayedPage: 1,
             pageLength: 50,
             queryUsedForSearch: null,
             wrapperResponses: null,
-            totalNum: 0,// num of persisted entries on db
+            biggestTotal: 0,
+            totalNum: 0,
             fields: ['doi','P','dismiss','publicationDate', 'title','authors','publicationName','publisher','uri'],
-            tableItems: []
+            tableItems: [],
+            successfullyPersisted: false
         };
     },
 
@@ -249,6 +241,9 @@ export default {
             this.keyWords = this.wrapperResponses[0].facets.keywords
             this.countryData = this.wrapperResponses[0].facets.countries
             this.wrapperResponses.forEach(d=>{
+                if(parseInt(d.result.total)>this.biggestTotal){
+                    this.biggestTotal=parseInt(d.result.total)
+                }
                 this.totalNum += parseInt(d.result.total)
                 console.log(`d.result.total ${d.result.total}`)
                 if(d.records.length > 0){
@@ -258,6 +253,7 @@ export default {
         },
 
         onSubmitSearch(){
+            this.displayedPage = 1
             this.tableItems = []
             this.resultsLoading = true
             this.queryUsedForSearch = this.buildQuery()
@@ -267,6 +263,19 @@ export default {
                 this.processWrapperResponses()
                 this.resultsLoading = false
             }).catch(error => console.log(error))
+        },
+
+        changePage(offset){
+            this.displayedPage += offset
+            this.tableItems = []
+            this.resultsLoading = true
+            this.$http.post(`/query?page=${this.displayedPage}&page_length=${this.pageLength}&review_id=${SessionStore.data.reviewId}`,{"search":this.queryUsedForSearch})
+            .then(data => {
+                this.wrapperResponses = data.data
+                this.processWrapperResponses()
+                this.resultsLoading = false
+            }).catch(error => console.log(error))
+
         },
 
         onRowClicked(row) {
@@ -280,7 +289,9 @@ export default {
 
         persist(){
             this.$http.post(`persist/${SessionStore.data.reviewId}/list`,{"results":this.tableItems,"search":this.queryUsedForSearch})
-            .then(data => console.log(`persisted ${data}`))
+            .then(data => {console.log(`persisted ${data}`);
+                            this.successfullyPersisted=true}
+            )
             .catch(error => console.log(error))
         },
     },
