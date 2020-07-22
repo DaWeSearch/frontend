@@ -3,7 +3,7 @@
         <b-nav id="nav">
             <b-nav-item active disabled>Reviews</b-nav-item>
             <b-nav-item class="ml-auto"><b-link to="/about">About</b-link></b-nav-item>
-            <b-button squared  variant="">Log out</b-button>
+            <b-button squared @click="logout()" variant="">Log out</b-button>
         </b-nav>
 
         <b-container>
@@ -168,6 +168,12 @@ export default {
                 console.log("cant add user without username")
             }
         },
+
+        logout(){
+            console.log("logout at review page")
+            SessionStore.methods.setNull()
+            this.$router.push("/login")
+        }
     }
 }
 </script>

@@ -2,6 +2,7 @@
     <div class="about">
         <b-jumbotron header="DaWeSearch" lead="A tool accelerating your systematic literature review" >
             <b-button variant="light" v-if="!username"><b-link  to="/login">Get started!</b-link></b-button>
+            <b-button variant="light" v-if="username"><b-link  to="/">Back to Reviews</b-link></b-button>
         </b-jumbotron>
         <b-carousel
                 id="carousel-1"
@@ -78,7 +79,6 @@ import SessionStore from "../stores/SessionStore"
             };
         },
         methods: {
-            username: SessionStore.data.username,
             newTab: function () {
                 window.open("https://www.ise.tu-berlin.de/menue/information_systems_engineering/", "_blank");
             },

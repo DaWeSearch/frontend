@@ -5,7 +5,7 @@
             <b-nav-item>></b-nav-item>
             <b-nav-item active disabled>Search</b-nav-item>
             <b-nav-item class="ml-auto"><b-link to="/about">About</b-link></b-nav-item>
-            <b-button squared>Log out</b-button>
+            <b-button squared @click="logout()">Log out</b-button>
         </b-nav>
 
         <b-container fluid>
@@ -294,6 +294,12 @@ export default {
             )
             .catch(error => console.log(error))
         },
+
+        logout(){
+            console.log("logout at search page")
+            SessionStore.methods.setNull()
+            this.$router.push("/login")
+        }
     },
 
     components: {

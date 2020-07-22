@@ -5,7 +5,7 @@
             <b-nav-item>></b-nav-item>
             <b-nav-item active disabled>Score</b-nav-item>
             <b-nav-item class="ml-auto"><b-link to="/about">About</b-link></b-nav-item>
-            <b-button squared>Log out</b-button>
+            <b-button squared @click="logout()">Log out</b-button>
         </b-nav>
         
         <b-table hover striped small :items="tableItems" :fields="fields" selectable select-mode="single" @row-clicked="onRowClicked">
@@ -175,6 +175,12 @@ export default {
 
         onRowClicked(row) {
             row._showDetails=!row._showDetails;
+        },
+
+        logout(){
+            console.log("logout at score page")
+            SessionStore.methods.setNull()
+            this.$router.push("/login")
         }
     }
 }
