@@ -35,9 +35,9 @@
 
                         <template v-slot:footer>
                             <b-input-group>
-                                <b-form-input v-model="newField" @keypress.enter="addTerm(exclude_terms)" placeholder="Term to exclude"></b-form-input>
+                                <b-form-input v-model="newExcludeTerm" @keypress.enter="addExcludeTerm()" placeholder="Term to exclude"></b-form-input>
                                 <b-input-group-append>
-                                    <b-button variant="outline-danger" @click="addTerm(exclude_terms)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                    <b-button variant="outline-danger" @click="addExcludeTerm()"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
                                 </b-input-group-append>
                             </b-input-group>
                         </template>
@@ -61,9 +61,9 @@
 
                         <template v-slot:footer>
                             <b-input-group>
-                                <b-form-input v-model="newField" @keypress.enter="addTerm(searchGroup.search_terms)" placeholder="Add term to category"></b-form-input>
+                                <b-form-input v-model="newIncludeTerms[index]" @keypress.enter="addTerm(searchGroup.search_terms,index)" placeholder="Add term to category"></b-form-input>
                                 <b-input-group-append>
-                                    <b-button variant="info" @click="addTerm(searchGroup.search_terms)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
+                                    <b-button variant="info" @click="addTerm(searchGroup.search_terms,index)"><b-icon-plus-circle-fill> </b-icon-plus-circle-fill></b-button>
                                 </b-input-group-append>
                             </b-input-group>
                         </template>
@@ -161,28 +161,36 @@ export default {
     name: 'Search',
     data: () => {
         return {
-            keyWords: null,
-            countryData: null,
-            fontSizeMapper: word => Math.log2(word.value) * 40,
             resultsLoading: false,
+
             newSearchGroup:"",
-            newField: "",
+            newExcludeTerm: "",
+            newIncludeTerms: [""],
+
             exclude_terms: [],
             search_groups: [{"search_terms":[],"match":"OR"}],
+
             selectedSearchFields: ["all"],
             searchFieldOptions: [{ value: ["all"], text: 'all fields' },
                                 { value: ["keywords"], text: 'keywords only' },
                                 { value: ["title"], text: 'title only' },
                                 { value: ["keywords","title"], text: 'keywords and title' },
                                 ],
+
             displayedPage: 1,
             pageLength: 50,
             queryUsedForSearch: null,
+
             wrapperResponses: null,
+            keyWords: null,
+            countryData: null,
+            fontSizeMapper: word => Math.log2(word.value) * 40,
+
             biggestTotal: 0,
             totalNum: 0,
             fields: ['doi','P','dismiss','publicationDate', 'title','authors','publicationName','publisher','uri'],
             tableItems: [],
+
             successfullyPersisted: false
         };
     },
@@ -202,6 +210,7 @@ export default {
     methods: {
         addSearchGroup(){
             if(this.newSearchGroup!=""){
+                this.newIncludeTerms.push("")
                 this.search_groups.push({"search_terms":[this.newSearchGroup],"match":"OR"})
             }
             this.newSearchGroup=""
@@ -209,13 +218,21 @@ export default {
 
         removeSearchGroup(index){
             this.search_groups.splice(index,1)
+            this.newIncludeTerms.splice(index,1)
         },
 
-        addTerm(searchTerms){
-            if(this.newField!="" && !searchTerms.includes(this.newField)){
-                searchTerms.push(this.newField)
+        addExcludeTerm(){
+            if(this.newExcludeTerm!="" && !this.exclude_terms.includes(this.newExcludeTerm)){
+                this.exclude_terms.push(this.newExcludeTerm)
             }
-            this.newField=""
+            this.newExcludeTerm=""
+        },
+
+        addTerm(searchTerms,index){
+            if(this.newIncludeTerms[index]!="" && !searchTerms.includes(this.newIncludeTerms[index])){
+                searchTerms.push(this.newIncludeTerms[index])
+            }
+            this.newIncludeTerms[index]=""
         },
 
         removeTerm(group,index){
